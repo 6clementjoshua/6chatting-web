@@ -1,54 +1,68 @@
+// app/api/waitlist/route.ts
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 function isValidEmail(email: string) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 export async function POST(req: Request) {
-    try {
-        const { email } = (await req.json()) as { email?: string };
-        const cleanEmail = (email ?? "").trim().toLowerCase();
+  try {
+    const { email } = (await req.json()) as { email?: string };
+    const cleanEmail = (email ?? "").trim().toLowerCase();
 
-        if (!cleanEmail || !isValidEmail(cleanEmail)) {
-            return NextResponse.json(
-                { ok: false, error: "Please enter a valid email address." },
-                { status: 400 }
-            );
-        }
+    if (!cleanEmail || !isValidEmail(cleanEmail)) {
+      return NextResponse.json(
+        { ok: false, error: "Please enter a valid email address." },
+        { status: 400 }
+      );
+    }
 
-        // Insert into waitlist (duplicates treated as OK if email is UNIQUE)
-        const { error: insertError } = await supabaseAdmin
-            .from("waitlist")
-            .insert({ email: cleanEmail });
+    // Create clients INSIDE the handler (build-safe)
+    const resendKey = process.env.RESEND_API_KEY;
+    const from = process.env.WAITLIST_FROM;
+    const siteUrl = process.env.SITE_URL ?? "https://6chatting.com";
 
-        if (insertError) {
-            const msg = insertError.message.toLowerCase();
-            const isDuplicate =
-                msg.includes("duplicate") || msg.includes("unique constraint");
-            if (!isDuplicate) {
-                return NextResponse.json(
-                    { ok: false, error: "Could not join waitlist. Try again." },
-                    { status: 500 }
-                );
-            }
-        }
+    if (!resendKey) {
+      return NextResponse.json(
+        { ok: false, error: "Email service not configured." },
+        { status: 500 }
+      );
+    }
+    if (!from) {
+      return NextResponse.json(
+        { ok: false, error: "Sender email not configured." },
+        { status: 500 }
+      );
+    }
 
-        // Send confirmation email
-        const from = process.env.WAITLIST_FROM!;
-        const siteUrl = process.env.SITE_URL ?? "https://6chatting.com";
+    const supabase = supabaseAdmin();
 
-        const privacyUrl = `${siteUrl}/policies/privacy`;
-        const termsUrl = `${siteUrl}/policies/terms`;
-      
+    // Insert into waitlist (duplicates treated as OK if email is UNIQUE)
+    const { error: insertError } = await supabase
+      .from("waitlist")
+      .insert({ email: cleanEmail });
 
-     const logoUrl =
-  "https://cuuxdbmmzlrcbrmoywcm.supabase.co/storage/v1/object/public/email-assets/6ix_logo_splash.PNG";
+    if (insertError) {
+      const msg = insertError.message.toLowerCase();
+      const isDuplicate =
+        msg.includes("duplicate") || msg.includes("unique constraint");
+      if (!isDuplicate) {
+        return NextResponse.json(
+          { ok: false, error: "Could not join waitlist. Try again." },
+          { status: 500 }
+        );
+      }
+    }
 
-const html = `<!doctype html>
+    const logoUrl =
+      "https://cuuxdbmmzlrcbrmoywcm.supabase.co/storage/v1/object/public/email-assets/6ix_logo_splash.PNG";
+
+    const privacyUrl = `${siteUrl}/policies/privacy`;
+    const termsUrl = `${siteUrl}/policies/terms`;
+
+    const html = `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8" />
@@ -58,25 +72,20 @@ const html = `<!doctype html>
   <title>You're on the 6Chatting Waitlist</title>
 
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #ffffff;
-      color: #0b0b0f;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .container { background-color: #ffffff; }
-    .title { color: #0b0b0f; }
-    .text { color: #3a3a3a; }
-    .muted { color: #6b6b6b; }
+    body { margin:0; padding:0; background-color:#ffffff; color:#0b0b0f;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .container { background-color:#ffffff; }
+    .title { color:#0b0b0f; }
+    .text { color:#3a3a3a; }
+    .muted { color:#6b6b6b; }
 
     @media (prefers-color-scheme: dark) {
-      body { background-color: #050505 !important; color: #ffffff !important; }
-      .container { background-color: #050505 !important; }
-      .title { color: #ffffff !important; }
-      .text { color: rgba(255, 255, 255, .72) !important; }
-      .muted { color: rgba(255, 255, 255, .45) !important; }
-      .logo-wrap { background: #ffffff !important; }
+      body { background-color:#050505 !important; color:#ffffff !important; }
+      .container { background-color:#050505 !important; }
+      .title { color:#ffffff !important; }
+      .text { color: rgba(255,255,255,.72) !important; }
+      .muted { color: rgba(255,255,255,.45) !important; }
+      .logo-wrap { background:#ffffff !important; }
     }
   </style>
 </head>
@@ -90,10 +99,7 @@ const html = `<!doctype html>
           <tr>
             <td align="center" style="padding:10px 0 18px;">
               <img src="${logoUrl}" width="56" height="56" alt="6Chatting" class="logo-wrap" style="
-                display:block;
-                border-radius:16px;
-                padding:10px;
-                background:#ffffff;
+                display:block; border-radius:16px; padding:10px; background:#ffffff;
                 box-shadow:0 10px 30px rgba(0,0,0,.25);
               " />
             </td>
@@ -118,20 +124,13 @@ const html = `<!doctype html>
 
           <tr>
             <td align="center" style="padding:8px 18px 18px;">
-              <a href="https://6chatting.com" style="
-                display:inline-block;
-                padding:18px 34px;
-                border-radius:999px;
-                background:#ffffff;
-                color:#0b0b0f;
-                text-decoration:none;
-                font-weight:800;
-                font-size:18px;
-                border:1px solid rgba(0,0,0,.08);
-                box-shadow:
-                  0 18px 40px rgba(0,0,0,.35),
-                  inset 0 2px 0 rgba(255,255,255,.95),
-                  inset 0 -10px 18px rgba(0,0,0,.12);
+              <a href="${siteUrl}" style="
+                display:inline-block; padding:18px 34px; border-radius:999px;
+                background:#ffffff; color:#0b0b0f; text-decoration:none;
+                font-weight:800; font-size:18px; border:1px solid rgba(0,0,0,.08);
+                box-shadow: 0 18px 40px rgba(0,0,0,.35),
+                            inset 0 2px 0 rgba(255,255,255,.95),
+                            inset 0 -10px 18px rgba(0,0,0,.12);
               ">
                 Visit 6Chatting
               </a>
@@ -159,8 +158,8 @@ const html = `<!doctype html>
           <tr>
             <td align="center" style="padding:10px 18px 0;">
               <div class="muted" style="font-size:12px;line-height:1.8;">
-                <a href="https://6chatting.com/policies/privacy" style="color:inherit;text-decoration:none;margin:0 10px;">Privacy Policy</a>
-                <a href="https://6chatting.com/policies/terms" style="color:inherit;text-decoration:none;margin:0 10px;">Terms of Service</a>
+                <a href="${privacyUrl}" style="color:inherit;text-decoration:none;margin:0 10px;">Privacy Policy</a>
+                <a href="${termsUrl}" style="color:inherit;text-decoration:none;margin:0 10px;">Terms of Service</a>
               </div>
             </td>
           </tr>
@@ -172,19 +171,20 @@ const html = `<!doctype html>
 </body>
 </html>`;
 
+    const resend = new Resend(resendKey);
 
-        await resend.emails.send({
-            from,
-            to: cleanEmail,
-            subject: "You’re on the 6chatting waitlist",
-            html,
-        });
+    await resend.emails.send({
+      from,
+      to: cleanEmail,
+      subject: "You’re on the 6chatting waitlist",
+      html,
+    });
 
-        return NextResponse.json({ ok: true });
-    } catch {
-        return NextResponse.json(
-            { ok: false, error: "Unexpected error. Try again." },
-            { status: 500 }
-        );
-    }
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    return NextResponse.json(
+      { ok: false, error: "Unexpected error. Try again." },
+      { status: 500 }
+    );
+  }
 }
