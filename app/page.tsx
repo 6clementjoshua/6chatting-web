@@ -358,7 +358,7 @@ export default function Page() {
 
               <div id="download" className="mt-6 grid gap-2 sm:flex sm:flex-wrap sm:gap-2">
                 <Button variant="primary" onClick={() => setWaitlistOpen(true)} className="w-full sm:w-auto">
-                  Download (Coming Soon)
+                  Download Now
                 </Button>
 
                 {/* ✅ This is now the ONLY "How it works" control (mobile CTA under Download) */}
