@@ -96,308 +96,221 @@ export default function Page() {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
 
   return (
-    <div
-      className={[
-        inter.variable,
-        spaceGrotesk.variable,
-        "min-h-screen bg-white text-black antialiased",
-      ].join(" ")}
-      style={{
-        fontFamily:
-          "var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
-      }}
-    >
-      {/* HEADER: compact on mobile, same vibe on desktop */}
-      <header className="sticky top-0 z-10 border-b border-black/5 bg-white/85 backdrop-blur-md">
-        <div className="mx-auto flex w-[min(1120px,calc(100%-24px))] items-center justify-between py-3 sm:py-4">
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-2xl border border-black/10 bg-white p-1 shadow-[10px_10px_22px_rgba(0,0,0,0.10),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-              <Image
-                src="/6logo.PNG"
-                alt="6chatting logo"
-                fill
-                sizes="(max-width: 640px) 40px, 48px"
-                className="object-contain"
-                priority
-              />
-            </div>
-
-            <div className="leading-tight min-w-0">
-              <div
-                className="text-sm font-semibold tracking-[-0.01em] text-black truncate"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                6chatting
+    <div className={[inter.variable, spaceGrotesk.variable].join(" ")}>
+      <div className="page-shell">
+        <header className="site-header">
+          <div className="container header-inner">
+            <Link href="/" className="brand">
+              <div className="brand-logo">
+                {/* IMPORTANT: your file name in /public must match this EXACTLY */}
+                <Image
+                  src="/6logo.PNG"
+                  alt="6chatting logo"
+                  fill
+                  sizes="(max-width: 640px) 40px, 48px"
+                  className="object-contain"
+                  priority
+                />
               </div>
-              <div className="text-xs font-medium text-neutral-700 truncate">
-                Connect. Translate. Communicate.
+
+              <div className="brand-text">
+                <div className="brand-name">6chatting</div>
+                <div className="brand-tagline">Connect. Translate. Communicate.</div>
               </div>
-            </div>
-          </Link>
+            </Link>
 
-          <nav className="flex items-center gap-2 shrink-0">
-            <div className="hidden sm:block">
-              <Button href="#how">How it works</Button>
-            </div>
+            <nav className="nav-actions">
+              <div className="hide-on-mobile">
+                <Button href="#how">How it works</Button>
+              </div>
 
-            {/* ✅ Mobile smaller pill */}
-            <Button
-              variant="primary"
-              onClick={() => setWaitlistOpen(true)}
-              className="get-app-btn"
-            >
-              Get the app
-            </Button>
-          </nav>
-        </div>
-      </header>
-
-      <main className="mx-auto w-[min(1120px,calc(100%-24px))] pb-12">
-        {/* HERO */}
-        <section className="grid gap-4 pt-6 sm:pt-10 md:grid-cols-[1.05fr_.95fr]">
-          <FadeIn delayMs={0}>
-            <BevelCard className="p-5 sm:p-7">
-              <Pill>Real-time translation • Text + Voice + Calls</Pill>
-
-              <h1
-                className="mt-4 text-[clamp(28px,6vw,54px)] font-extrabold leading-[1.05] tracking-[-0.045em] text-black"
-                style={{ fontFamily: "var(--font-display)" }}
+              {/* ✅ VERY SMALL on mobile */}
+              <Button
+                variant="primary"
+                onClick={() => setWaitlistOpen(true)}
+                className="get-app-btn"
               >
-                Chat in your language.
-                <br />
-                They receive it in theirs.
-              </h1>
+                Get the app
+              </Button>
+            </nav>
+          </div>
+        </header>
 
-              <p className="mt-3 max-w-xl text-[15px] sm:text-[15.5px] font-normal leading-[1.75] text-neutral-700">
-                6chatting removes language barriers for business, friendship, and
-                global connection. Choose your language at sign-up — conversations
-                are delivered in the receiver’s language instantly.
-              </p>
+        <main className="container main">
+          <section className="hero">
+            <FadeIn delayMs={0}>
+              <BevelCard className="p-5 sm:p-7">
+                <Pill>Real-time translation • Text + Voice + Calls</Pill>
 
-              {/* Mobile CTA: clean stacked buttons */}
-              <div id="download" className="mt-6 grid gap-2 sm:flex sm:flex-wrap sm:gap-2">
-                <Button
-                  variant="primary"
-                  onClick={() => setWaitlistOpen(true)}
-                  className="w-full sm:w-auto"
-                >
-                  Download (Coming Soon)
-                </Button>
+                <h1 className="hero-title">
+                  Chat in your language.
+                  <br />
+                  They receive it in theirs.
+                </h1>
 
-                <div className="sm:hidden">
-                  <Button href="#how" className="w-full">
-                    How it works
+                <p className="hero-copy">
+                  6chatting removes language barriers for business, friendship, and
+                  global connection. Choose your language at sign-up — conversations
+                  are delivered in the receiver’s language instantly.
+                </p>
+
+                <div id="download" className="hero-cta">
+                  <Button
+                    variant="primary"
+                    onClick={() => setWaitlistOpen(true)}
+                    className="w-full sm:w-auto"
+                  >
+                    Download (Coming Soon)
                   </Button>
+
+                  <div className="mobile-only">
+                    <Button href="#how" className="w-full">
+                      How it works
+                    </Button>
+                  </div>
                 </div>
+
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Pill>Instant chat translation</Pill>
+                  <Pill>Voice & calling translation</Pill>
+                  <Pill>Cross-border business friendly</Pill>
+                  <Pill>Policy-driven safety</Pill>
+                </div>
+              </BevelCard>
+            </FadeIn>
+
+            <FadeIn delayMs={90}>
+              <ProductPreview />
+            </FadeIn>
+          </section>
+
+          <section id="how" className="pt-8">
+            <FadeIn delayMs={0}>
+              <h2 className="section-title">How 6chatting works</h2>
+            </FadeIn>
+
+            <div className="mt-3 grid gap-3 md:grid-cols-3">
+              <FadeIn delayMs={60}>
+                <BevelCard className="p-5 sm:p-6">
+                  <h3 className="card-title">1) Choose your language</h3>
+                  <p className="card-copy">
+                    Pick your preferred language at sign-up. Change it anytime in settings.
+                    Sign-up using your email, create a unique password, verify your email.
+                  </p>
+                </BevelCard>
+              </FadeIn>
+
+              <FadeIn delayMs={120}>
+                <BevelCard className="p-5 sm:p-6">
+                  <h3 className="card-title">2) Chat or call normally</h3>
+                  <p className="card-copy">
+                    Start a chat — search for users via their email address. Type or speak
+                    naturally. Text translates automatically.
+                  </p>
+                </BevelCard>
+              </FadeIn>
+
+              <FadeIn delayMs={180}>
+                <BevelCard className="p-5 sm:p-6">
+                  <h3 className="card-title">3) Delivered in the receiver’s language</h3>
+                  <p className="card-copy">
+                    The receiver automatically gets your text translated in real time. This
+                    is the future of communication.
+                  </p>
+                </BevelCard>
+              </FadeIn>
+            </div>
+          </section>
+
+          <section className="pt-8">
+            <FadeIn delayMs={0}>
+              <h2 className="section-title">What’s inside</h2>
+            </FadeIn>
+
+            <div className="mt-3 grid gap-3 md:grid-cols-3">
+              <FadeIn delayMs={60}>
+                <BevelCard className="p-5 sm:p-6">
+                  <h3 className="card-title">Instant translation chat</h3>
+                  <p className="card-copy">
+                    Real-time multilingual messaging for personal and business use.
+                  </p>
+                </BevelCard>
+              </FadeIn>
+
+              <FadeIn delayMs={120}>
+                <BevelCard className="p-5 sm:p-6">
+                  <h3 className="card-title">Voice + calling translation</h3>
+                  <p className="card-copy">
+                    Designed to reduce misunderstanding across languages.
+                  </p>
+                </BevelCard>
+              </FadeIn>
+
+              <FadeIn delayMs={180}>
+                <BevelCard className="p-5 sm:p-6">
+                  <h3 className="card-title">Safety and trust</h3>
+                  <p className="card-copy">
+                    Public policies, community rules, and anti-fraud protections aligned with the app.
+                  </p>
+                </BevelCard>
+              </FadeIn>
+            </div>
+          </section>
+
+          <footer className="site-footer">
+            <div className="footer-inner">
+              <div className="footer-links">
+                <Link href="/policies/terms" target="_blank" rel="noopener noreferrer">
+                  Terms of Service
+                </Link>
+                <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer">
+                  Privacy Policy
+                </Link>
+                <Link
+                  href="/policies/subscription-billing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Subscription & Billing
+                </Link>
+                <Link href="/policies/refunds" target="_blank" rel="noopener noreferrer">
+                  Refund & Cancellation
+                </Link>
+                <Link
+                  href="/policies/acceptable-use"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Acceptable Use
+                </Link>
+                <Link href="/policies/contact" target="_blank" rel="noopener noreferrer">
+                  Contact
+                </Link>
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Pill>Instant chat translation</Pill>
-                <Pill>Voice & calling translation</Pill>
-                <Pill>Cross-border business friendly</Pill>
-                <Pill>Policy-driven safety</Pill>
+              <div className="footer-copy">
+                © {new Date().getFullYear()} 6chatting. A 6clement Joshua Service. All rights reserved.
               </div>
-            </BevelCard>
-          </FadeIn>
-
-          <FadeIn delayMs={90}>
-            <ProductPreview />
-          </FadeIn>
-        </section>
-
-        {/* HOW IT WORKS */}
-        <section id="how" className="pt-8">
-          <FadeIn delayMs={0}>
-            <h2
-              className="text-lg font-bold tracking-[-0.02em] text-black"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              How 6chatting works
-            </h2>
-          </FadeIn>
-
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
-            <FadeIn delayMs={60}>
-              <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  1) Choose your language
-                </h3>
-                <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
-                  Pick your preferred language at sign-up. Change it anytime in settings.
-                  Sign-up using your email, create a unique password, verify your email.
-                </p>
-              </BevelCard>
-            </FadeIn>
-
-            <FadeIn delayMs={120}>
-              <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  2) Chat or call normally
-                </h3>
-                <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
-                  Start a chat — search for users via their email address. Type or speak
-                  naturally. Text translates automatically.
-                </p>
-              </BevelCard>
-            </FadeIn>
-
-            <FadeIn delayMs={180}>
-              <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  3) Delivered in the receiver’s language
-                </h3>
-                <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
-                  The receiver automatically gets your text translated in real time. This
-                  is the future of communication.
-                </p>
-              </BevelCard>
-            </FadeIn>
-          </div>
-        </section>
-
-        {/* WHAT'S INSIDE */}
-        <section className="pt-8">
-          <FadeIn delayMs={0}>
-            <h2
-              className="text-lg font-bold tracking-[-0.02em] text-black"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              What’s inside
-            </h2>
-          </FadeIn>
-
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
-            <FadeIn delayMs={60}>
-              <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Instant translation chat
-                </h3>
-                <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
-                  Real-time multilingual messaging for personal and business use.
-                </p>
-              </BevelCard>
-            </FadeIn>
-
-            <FadeIn delayMs={120}>
-              <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Voice + calling translation
-                </h3>
-                <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
-                  Designed to reduce misunderstanding across languages.
-                </p>
-              </BevelCard>
-            </FadeIn>
-
-            <FadeIn delayMs={180}>
-              <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Safety and trust
-                </h3>
-                <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
-                  Public policies, community rules, and anti-fraud protections aligned with the app.
-                </p>
-              </BevelCard>
-            </FadeIn>
-          </div>
-        </section>
-
-        {/* FOOTER */}
-        <footer className="pt-10 text-neutral-700">
-          <div className="border-t border-black/10 pt-6">
-            <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-medium">
-              <Link href="/policies/terms" target="_blank" rel="noopener noreferrer">
-                Terms of Service
-              </Link>
-              <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer">
-                Privacy Policy
-              </Link>
-              <Link
-                href="/policies/subscription-billing"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Subscription & Billing
-              </Link>
-              <Link href="/policies/refunds" target="_blank" rel="noopener noreferrer">
-                Refund & Cancellation
-              </Link>
-              <Link
-                href="/policies/acceptable-use"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Acceptable Use
-              </Link>
-              <Link href="/policies/contact" target="_blank" rel="noopener noreferrer">
-                Contact
-              </Link>
             </div>
+          </footer>
 
-            <div className="mt-5 text-center text-xs font-normal text-neutral-600">
-              © {new Date().getFullYear()} 6chatting.{" "}
-              <span className="mx-1">A 6clement Joshua Service.</span>
-              All rights reserved.
-            </div>
-          </div>
-        </footer>
+          <WaitlistModal open={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
 
-        <WaitlistModal open={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
-
-        <style>{`
-          .reveal {
-            opacity: 0;
-            transform: translateY(6px);
-            animation: reveal-in 360ms ease forwards;
-          }
-          @keyframes reveal-in {
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .reveal { opacity: 1; transform: none; animation: none; }
-          }
-        `}</style>
-
-        {/* Typography + mobile button tweak */}
-        <style jsx global>{`
-          :root {
-            --font-sans: ${inter.style.fontFamily};
-            --font-display: ${spaceGrotesk.style.fontFamily};
-          }
-          html {
-            -webkit-text-size-adjust: 100%;
-            text-rendering: optimizeLegibility;
-          }
-
-          /* ✅ Mobile-only: smaller pill button for header CTA */
-          @media (max-width: 640px) {
-            .get-app-btn {
-              padding: 8px 14px !important;
-              font-size: 13px !important;
-              border-radius: 999px !important;
-              min-height: auto !important;
+          <style>{`
+            .reveal {
+              opacity: 0;
+              transform: translateY(6px);
+              animation: reveal-in 360ms ease forwards;
             }
-          }
-        `}</style>
-      </main>
+            @keyframes reveal-in {
+              to { opacity: 1; transform: translateY(0); }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .reveal { opacity: 1; transform: none; animation: none; }
+            }
+          `}</style>
+        </main>
+      </div>
     </div>
   );
 }

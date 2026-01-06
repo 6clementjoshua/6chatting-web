@@ -1,234 +1,257 @@
 /* app/globals.css */
-@import "tailwindcss";
 
-/* =========================
-   LIGHT-ONLY THEME (FORCED)
-   ========================= */
+/* Force LIGHT look (no dark-mode bleed on mobile) */
 :root {
-  /* Force light everywhere */
   color-scheme: light;
+}
 
-  --bg: #ffffff;
-  --fg: #0b0b0b;
-
-  /* Bevel palette tuned for light UI */
-  --stroke: rgba(0, 0, 0, 0.10);
-  --shadowDark: rgba(0, 0, 0, 0.12);
-  --shadowSoft: rgba(0, 0, 0, 0.08);
-  --shadowLight: rgba(255, 255, 255, 0.98);
-
-  --radius: 18px;
+/* Typography tokens from next/font */
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+    Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-display: var(--font-sans);
 }
 
 html {
-  background: var(--bg);
-  color: var(--fg);
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
+  background: #ffffff;
 }
 
 body {
-  background: var(--bg) !important;
-  color: var(--fg) !important;
+  margin: 0;
+  background: #ffffff;
+  color: #0b0b0f;
+  font-family: var(--font-sans);
+}
 
-  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Roboto,
-    Arial, "Helvetica Neue", sans-serif;
+/* Layout helpers */
+.page-shell {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #0b0b0f;
+}
 
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.container {
+  width: min(1120px, calc(100% - 24px));
+  margin: 0 auto;
+}
 
+.main {
+  padding-bottom: 48px;
+}
+
+/* Header */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-logo {
+  position: relative;
+  height: 40px;
+  width: 40px;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  padding: 6px;
+  overflow: hidden;
+  box-shadow: 10px 10px 22px rgba(0, 0, 0, 0.10), -10px -10px 22px rgba(255, 255, 255, 0.95);
+}
+
+.brand-text {
+  min-width: 0;
+  line-height: 1.1;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Ensure form controls stay light */
-input,
-textarea,
-select,
-button {
-  color-scheme: light;
+.brand-tagline {
+  font-weight: 500;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-::selection {
-  background: rgba(0, 0, 0, 0.10);
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
 }
 
-a,
-a:hover,
-a:focus,
-a:active {
+.hide-on-mobile {
+  display: none;
+}
+
+.mobile-only {
+  display: block;
+}
+
+@media (min-width: 640px) {
+  .header-inner {
+    padding: 16px 0;
+  }
+
+  .brand-logo {
+    height: 48px;
+    width: 48px;
+  }
+
+  .hide-on-mobile {
+    display: block;
+  }
+
+  .mobile-only {
+    display: none;
+  }
+}
+
+/* Hero layout */
+.hero {
+  display: grid;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+@media (min-width: 768px) {
+  .hero {
+    grid-template-columns: 1.05fr 0.95fr;
+    padding-top: 40px;
+  }
+}
+
+.hero-title {
+  margin: 16px 0 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+  font-size: clamp(28px, 6vw, 54px);
+}
+
+.hero-copy {
+  margin-top: 12px;
+  max-width: 620px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.hero-cta {
+  margin-top: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .hero-cta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+/* Section typography */
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 18px;
+  margin: 0;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0;
+}
+
+.card-copy {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.75;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Footer */
+.site-footer {
+  padding-top: 40px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.footer-inner {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 20px;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 24px;
+  row-gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.footer-links a {
+  color: inherit;
   text-decoration: none;
 }
 
-/* =========================
-   Water / Bevel system (Light-only)
-   ========================= */
-
-.water-bevel {
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius);
-  background: #ffffff;
-
-  box-shadow:
-    10px 10px 22px var(--shadowDark),
-    -10px -10px 22px var(--shadowLight);
-
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
+.footer-links a:hover {
+  text-decoration: underline;
 }
 
-.water-bevel>* {
-  position: relative;
-  z-index: 1;
+.footer-copy {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-.water-bevel::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.22;
-  background:
-    radial-gradient(800px 240px at 30% 0%,
-      rgba(255, 255, 255, 0.95),
-      rgba(255, 255, 255, 0) 60%),
-    radial-gradient(700px 260px at 100% 30%,
-      rgba(0, 0, 0, 0.05),
-      rgba(0, 0, 0, 0) 55%);
-}
-
-/* Inset bevel (for media areas) */
-.water-inset {
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius);
-  background: #ffffff;
-
-  box-shadow:
-    inset 10px 10px 20px var(--shadowSoft),
-    inset -10px -10px 20px var(--shadowLight);
-
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.water-inset>* {
-  position: relative;
-  z-index: 1;
-}
-
-/* =========================
-   Buttons (premium, mobile-friendly)
-   ========================= */
-.water-btn {
-  border: 1px solid var(--stroke);
-  border-radius: 14px;
-  background: #ffffff;
-  position: relative;
-  overflow: hidden;
-
-  box-shadow:
-    8px 8px 18px var(--shadowDark),
-    -8px -8px 18px var(--shadowLight);
-
-  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
-  will-change: transform, box-shadow;
-}
-
-.water-btn::before {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  background: linear-gradient(120deg,
-      rgba(255, 255, 255, 0.00) 35%,
-      rgba(255, 255, 255, 0.55) 48%,
-      rgba(255, 255, 255, 0.00) 60%);
-  transform: translateX(-30%) rotate(10deg);
-  opacity: 0;
-  transition: opacity 180ms ease, transform 520ms ease;
-  pointer-events: none;
-}
-
-.water-btn:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    10px 10px 22px var(--shadowDark),
-    -10px -10px 22px var(--shadowLight),
-    0 0 0 1px rgba(0, 0, 0, 0.04);
-  filter: saturate(1.04);
-}
-
-.water-btn:hover::before {
-  opacity: 1;
-  transform: translateX(10%) rotate(10deg);
-}
-
-.water-btn:active {
-  transform: translateY(0px);
-  box-shadow:
-    inset 10px 10px 22px var(--shadowSoft),
-    inset -10px -10px 22px var(--shadowLight);
-}
-
-/* Primary button (black) */
-.water-btn-primary {
-  background: #0b0b0b;
-  color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.55);
-
-  box-shadow:
-    10px 10px 22px rgba(0, 0, 0, 0.20),
-    -10px -10px 22px rgba(255, 255, 255, 0.85);
-}
-
-/* Premium: keep primary stable on mobile (less aggressive hover) */
-.water-btn-primary:hover {
-  box-shadow:
-    12px 12px 26px rgba(0, 0, 0, 0.22),
-    -12px -12px 26px rgba(255, 255, 255, 0.82);
-}
-
-.water-btn-primary:active {
-  box-shadow:
-    inset 12px 12px 26px rgba(0, 0, 0, 0.28),
-    inset -12px -12px 26px rgba(255, 255, 255, 0.16);
-}
-
-/* =========================
-   Mobile-specific refinements
-   ========================= */
-@media (max-width: 640px) {
-  .water-bevel {
-    /* Reduce heavy shadows on small screens */
-    box-shadow:
-      8px 8px 18px rgba(0, 0, 0, 0.10),
-      -8px -8px 18px rgba(255, 255, 255, 0.98);
-  }
-
-  .water-btn {
-    box-shadow:
-      6px 6px 14px rgba(0, 0, 0, 0.10),
-      -6px -6px 14px rgba(255, 255, 255, 0.98);
-  }
-}
-
-/* reduce motion if user requests it */
-@media (prefers-reduced-motion: reduce) {
-
-  .water-btn,
-  .water-btn::before {
-    transition: none !important;
-  }
-}
-
-/* Mobile-only: smaller pill button for header CTA */
+/* ✅ VERY SMALL: Get the app button on mobile only */
 @media (max-width: 640px) {
   .get-app-btn {
-    padding: 8px 14px !important;
-    font-size: 13px !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
     border-radius: 999px !important;
-    /* pill */
     min-height: auto !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+    /* avoids giant shadow on mobile */
   }
 }
