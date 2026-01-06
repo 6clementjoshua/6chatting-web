@@ -116,7 +116,7 @@ export default function Page() {
                 Rename your file to: public/6logo.png (lowercase) */}
             <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-2xl border border-black/10 bg-white p-1 shadow-[10px_10px_22px_rgba(0,0,0,0.10),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
               <Image
-                src="/6logo.png"
+                src="/6logo.PNG"
                 alt="6chatting logo"
                 fill
                 sizes="(max-width: 640px) 40px, 48px"
