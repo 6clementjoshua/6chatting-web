@@ -232,3 +232,9 @@ a:active {
     min-height: auto !important;
   }
 }
+/* Hide "How it works" button in header on mobile */
+@media (max-width: 768px) {
+  .header-how-it-works {
+    display: none !important;
+  }
+}

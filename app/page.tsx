@@ -210,7 +210,10 @@ export default function Page() {
             </div>
 
             <div className="leading-tight min-w-0">
-              <div className="text-sm font-semibold tracking-[-0.01em] text-black" style={{ fontFamily: "var(--font-display)" }}>
+              <div
+                className="text-sm font-semibold tracking-[-0.01em] text-black"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
                 6chatting
               </div>
               <div className="text-[12px] font-medium text-neutral-700 leading-snug whitespace-normal">
@@ -230,10 +233,7 @@ export default function Page() {
           </nav>
 
           <div className="flex items-center justify-end gap-2 shrink-0">
-            {/* Only show on lg+ (desktop). Not on mobile header. */}
-            <button type="button" onClick={() => scrollToId("how")} className="hidden lg:inline-flex nav-pill">
-              How it works
-            </button>
+            {/* ✅ REMOVED: "How it works" button from header (all screen sizes) */}
 
             <button
               type="button"
@@ -294,19 +294,21 @@ export default function Page() {
             )}
           >
             <div className="p-3">
+              {/* ✅ REMOVED: "How it works" from the header menu as well.
+                  We will ONLY keep "How it works" under the Download button (mobile section CTA). */}
               <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  className="water-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold tracking-[-0.01em] select-none w-full"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setTimeout(() => scrollToId("how"), 60);
-                  }}
-                >
-                  How it works
-                </button>
                 <Button href="/pricing" className="w-full py-2.5" onClick={() => setMenuOpen(false)}>
                   Pricing
+                </Button>
+                <Button
+                  variant="primary"
+                  className="w-full py-2.5"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setTimeout(() => setWaitlistOpen(true), 80);
+                  }}
+                >
+                  Get the app
                 </Button>
               </div>
 
@@ -359,8 +361,14 @@ export default function Page() {
                   Download (Coming Soon)
                 </Button>
 
+                {/* ✅ This is now the ONLY "How it works" control (mobile CTA under Download) */}
                 <div className="sm:hidden">
-                  <Button href="#how" className="w-full" onClick={() => scrollToId("how")}>
+                  <Button
+                    href="#how"
+                    className="w-full"
+                    onClick={() => scrollToId("how")}
+                    ariaLabel="Scroll to How it works"
+                  >
                     How it works
                   </Button>
                 </div>
@@ -426,8 +434,13 @@ export default function Page() {
             --font-sans: ${inter.style.fontFamily};
             --font-display: ${spaceGrotesk.style.fontFamily};
           }
-          .no-scrollbar::-webkit-scrollbar { display: none; }
-          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          .no-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
 
           .nav-pill {
             display: inline-flex;
@@ -436,18 +449,18 @@ export default function Page() {
             white-space: nowrap;
             padding: 7px 12px;
             border-radius: 999px;
-            border: 1px solid rgba(0,0,0,0.12);
-            background: rgba(255,255,255,0.75);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            background: rgba(255, 255, 255, 0.75);
             font-size: 13px;
             font-weight: 650;
             letter-spacing: -0.01em;
-            color: rgba(17,17,17,0.92);
+            color: rgba(17, 17, 17, 0.92);
             box-shadow: none;
             transition: box-shadow 160ms ease, background 160ms ease, transform 160ms ease;
           }
           .nav-pill:hover {
-            background: rgba(255,255,255,0.95);
-            box-shadow: 10px 10px 22px rgba(0,0,0,0.10), -10px -10px 22px rgba(255,255,255,0.95);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 10px 10px 22px rgba(0, 0, 0, 0.1), -10px -10px 22px rgba(255, 255, 255, 0.95);
           }
 
           .v-pills-all {
@@ -455,16 +468,32 @@ export default function Page() {
             justify-items: center;
             gap: 10px;
           }
-          .v-pills-all .v-pill:nth-child(1) { width: min(720px, 98%); }
-          .v-pills-all .v-pill:nth-child(2) { width: min(680px, 92%); }
-          .v-pills-all .v-pill:nth-child(3) { width: min(640px, 86%); }
-          .v-pills-all .v-pill:nth-child(4) { width: min(600px, 80%); }
+          .v-pills-all .v-pill:nth-child(1) {
+            width: min(720px, 98%);
+          }
+          .v-pills-all .v-pill:nth-child(2) {
+            width: min(680px, 92%);
+          }
+          .v-pills-all .v-pill:nth-child(3) {
+            width: min(640px, 86%);
+          }
+          .v-pills-all .v-pill:nth-child(4) {
+            width: min(600px, 80%);
+          }
 
           @media (max-width: 640px) {
-            .v-pills-all .v-pill:nth-child(1) { width: 96%; }
-            .v-pills-all .v-pill:nth-child(2) { width: 90%; }
-            .v-pills-all .v-pill:nth-child(3) { width: 84%; }
-            .v-pills-all .v-pill:nth-child(4) { width: 78%; }
+            .v-pills-all .v-pill:nth-child(1) {
+              width: 96%;
+            }
+            .v-pills-all .v-pill:nth-child(2) {
+              width: 90%;
+            }
+            .v-pills-all .v-pill:nth-child(3) {
+              width: 84%;
+            }
+            .v-pills-all .v-pill:nth-child(4) {
+              width: 78%;
+            }
           }
         `}</style>
       </main>
