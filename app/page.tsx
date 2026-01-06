@@ -430,72 +430,54 @@ export default function Page() {
         <WaitlistModal open={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
 
         <style jsx global>{`
-          :root {
-            --font-sans: ${inter.style.fontFamily};
-            --font-display: ${spaceGrotesk.style.fontFamily};
-          }
-          .no-scrollbar::-webkit-scrollbar {
-            display: none;
-          }
-          .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
+  :root {
+    --font-sans: ${inter.style.fontFamily};
+    --font-display: ${spaceGrotesk.style.fontFamily};
+  }
 
-          .nav-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            white-space: nowrap;
-            padding: 7px 12px;
-            border-radius: 999px;
-            border: 1px solid rgba(0, 0, 0, 0.12);
-            background: rgba(255, 255, 255, 0.75);
-            font-size: 13px;
-            font-weight: 650;
-            letter-spacing: -0.01em;
-            color: rgba(17, 17, 17, 0.92);
-            box-shadow: none;
-            transition: box-shadow 160ms ease, background 160ms ease, transform 160ms ease;
-          }
-          .nav-pill:hover {
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 10px 10px 22px rgba(0, 0, 0, 0.1), -10px -10px 22px rgba(255, 255, 255, 0.95);
-          }
+  /* === FIX: Feature pills layout ===
+     Mobile: keep the centered stacked look
+     Desktop/Tablet: 2x2 grid (no V shape)
+  */
+  .v-pills-all {
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+  }
 
-          .v-pills-all {
-            display: grid;
-            justify-items: center;
-            gap: 10px;
-          }
-          .v-pills-all .v-pill:nth-child(1) {
-            width: min(720px, 98%);
-          }
-          .v-pills-all .v-pill:nth-child(2) {
-            width: min(680px, 92%);
-          }
-          .v-pills-all .v-pill:nth-child(3) {
-            width: min(640px, 86%);
-          }
-          .v-pills-all .v-pill:nth-child(4) {
-            width: min(600px, 80%);
-          }
+  /* MOBILE (keep your current look) */
+  .v-pills-all .v-pill:nth-child(1) { width: 96%; }
+  .v-pills-all .v-pill:nth-child(2) { width: 90%; }
+  .v-pills-all .v-pill:nth-child(3) { width: 84%; }
+  .v-pills-all .v-pill:nth-child(4) { width: 78%; }
 
-          @media (max-width: 640px) {
-            .v-pills-all .v-pill:nth-child(1) {
-              width: 96%;
-            }
-            .v-pills-all .v-pill:nth-child(2) {
-              width: 90%;
-            }
-            .v-pills-all .v-pill:nth-child(3) {
-              width: 84%;
-            }
-            .v-pills-all .v-pill:nth-child(4) {
-              width: 78%;
-            }
-          }
-        `}</style>
+  /* DESKTOP/TABLET: switch to 2x2 grid, equal widths */
+  @media (min-width: 640px) {
+    .v-pills-all {
+      width: min(720px, 100%);
+      margin-top: 16px;
+      justify-items: stretch;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    /* override the V widths */
+    .v-pills-all .v-pill:nth-child(1),
+    .v-pills-all .v-pill:nth-child(2),
+    .v-pills-all .v-pill:nth-child(3),
+    .v-pills-all .v-pill:nth-child(4) {
+      width: 100%;
+    }
+
+    /* make each pill look “button-like” on desktop */
+    .v-pills-all .v-pill {
+      justify-content: center;
+      padding: 12px 14px;
+      font-size: 13px;
+    }
+  }
+`}</style>
+
       </main>
     </div>
   );
