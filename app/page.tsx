@@ -20,18 +20,16 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
 });
 
-/** Premium desktop links (shown on md+) */
+/** Desktop links (md+) */
 const DESKTOP_NAV = [
   { label: "Personal", href: "/personal" },
   { label: "Business", href: "/business" },
   { label: "Blog", href: "/blog" },
   { label: "Help Center", href: "/help" },
   { label: "Jobs", href: "/jobs" },
-
-  // Extra buttons that fit 6chatting and your Premier/Premium flow:
-  { label: "Pricing", href: "/pricing" }, // Premier & Premium plans live here
-  { label: "Status", href: "/status" }, // trust + transparency
-  { label: "Developers", href: "/developers" }, // APIs/SDK in future (also signals “serious product”)
+  { label: "Pricing", href: "/pricing" },
+  { label: "Status", href: "/status" },
+  { label: "Developers", href: "/developers" },
 ];
 
 function cx(...parts: Array<string | false | undefined | null>) {
@@ -39,7 +37,7 @@ function cx(...parts: Array<string | false | undefined | null>) {
 }
 
 function useOnClickOutside(
-  refs: React.RefObject<any>[],
+  refs: React.RefObject<HTMLElement | null>[],
   handler: () => void,
   enabled: boolean
 ) {
@@ -49,7 +47,7 @@ function useOnClickOutside(
     const onDown = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node | null;
       if (!target) return;
-      const isInside = refs.some((r) => r.current && (r.current as Node).contains(target));
+      const isInside = refs.some((r) => r.current && r.current.contains(target));
       if (!isInside) handler();
     };
 
@@ -114,12 +112,7 @@ const Button = ({
   }
 
   return (
-    <button
-      className={cls}
-      type="button"
-      onClick={onClick}
-      aria-label={ariaLabel}
-    >
+    <button className={cls} type="button" onClick={onClick} aria-label={ariaLabel}>
       {children}
     </button>
   );
@@ -134,25 +127,15 @@ const FadeIn = ({
   delayMs?: number;
   className?: string;
 }) => (
-  <div
-    className={cx("reveal", className)}
-    style={{ animationDelay: `${delayMs}ms` }}
-  >
+  <div className={cx("reveal", className)} style={{ animationDelay: `${delayMs}ms` }}>
     {children}
   </div>
 );
 
-/** Simple inline SVG icons (no extra deps) */
+/** Icons (no deps) */
 function IconMenu({ className = "" }: { className?: string }) {
   return (
-    <svg
-      className={className}
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none">
       <path
         d="M4 7h16M4 12h16M4 17h16"
         stroke="currentColor"
@@ -165,19 +148,29 @@ function IconMenu({ className = "" }: { className?: string }) {
 
 function IconClose({ className = "" }: { className?: string }) {
   return (
-    <svg
-      className={className}
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none">
       <path
         d="M6 6l12 12M18 6L6 18"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function IconDownloadSolid({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        fill="currentColor"
+        d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4.01 4.01a1 1 0 0 1-1.38 0L7.3 11.71a1 1 0 1 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v1h12v-1a1 1 0 1 1 2 0v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1Z"
       />
     </svg>
   );
@@ -193,10 +186,8 @@ export default function Page() {
 
   const year = useMemo(() => new Date().getFullYear(), []);
 
-  // Close menu on outside click / touch
   useOnClickOutside([menuPanelRef, menuBtnRef], () => setMenuOpen(false), menuOpen);
 
-  // Close menu on ESC
   useEffect(() => {
     if (!menuOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -206,7 +197,6 @@ export default function Page() {
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
-  // Prevent background scroll when menu is open
   useEffect(() => {
     if (!menuOpen) return;
     const original = document.body.style.overflow;
@@ -228,8 +218,8 @@ export default function Page() {
           "var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
       }}
     >
-      {/* HEADER: compact & premium on mobile, full nav on desktop */}
-      <header className="sticky top-0 z-20 border-b border-black/5 bg-white/85 backdrop-blur-md">
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/85 backdrop-blur-md">
         <div className="mx-auto flex w-[min(1120px,calc(100%-24px))] items-center justify-between py-3 sm:py-4">
           {/* Left: logo + wordmark */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -251,46 +241,58 @@ export default function Page() {
               >
                 6chatting
               </div>
-              <div className="text-xs font-medium text-neutral-700 truncate">
+              {/* Make tagline shorter on small screens to prevent overlap */}
+              <div className="text-xs font-medium text-neutral-700 truncate max-w-[175px] sm:max-w-none">
                 Connect. Translate. Communicate.
               </div>
             </div>
           </Link>
 
-          {/* Center: desktop nav (md+) */}
-          <nav className="hidden md:flex items-center gap-2">
-            {DESKTOP_NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cx(
-                  "px-3 py-2 text-sm font-semibold text-neutral-800",
-                  "rounded-full border border-black/10 bg-white/80",
-                  "shadow-[6px_6px_14px_rgba(0,0,0,0.08),_-6px_-6px_14px_rgba(255,255,255,0.95)]",
-                  "hover:bg-white focus:outline-none focus:ring-2 focus:ring-black/10"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+          {/* Desktop nav (md+) — flat by default, water effect ONLY on hover */}
+          <nav className="hidden md:flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
+              {DESKTOP_NAV.map((item) => (
+                <Link key={item.href} href={item.href} className="nav-pill">
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           </nav>
 
-          {/* Right: actions */}
+          {/* Right actions */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Desktop: keep "How it works" + Get the app */}
+            {/* Desktop: "How it works" + Get the app */}
             <div className="hidden sm:block">
               <Button href="#how">How it works</Button>
             </div>
 
-            <Button
-              variant="primary"
+            {/* Mobile: replace Get the app text with a black download icon */}
+            <button
+              type="button"
               onClick={() => setWaitlistOpen(true)}
-              className="get-app-btn"
+              aria-label="Download / Get the app"
+              className={cx(
+                "sm:hidden",
+                "inline-flex items-center justify-center",
+                "h-10 w-10 rounded-full",
+                "border border-black/15 bg-white",
+                "active:scale-[0.98] transition-transform"
+              )}
             >
-              Get the app
-            </Button>
+              <IconDownloadSolid className="text-black" />
+            </button>
 
-            {/* Mobile: menu button (smaller, premium) */}
+            <div className="hidden sm:block">
+              <Button
+                variant="primary"
+                onClick={() => setWaitlistOpen(true)}
+                className="get-app-btn"
+              >
+                Get the app
+              </Button>
+            </div>
+
+            {/* Mobile menu button — NO 3D shadow */}
             <button
               ref={menuBtnRef}
               type="button"
@@ -300,9 +302,9 @@ export default function Page() {
               onClick={() => setMenuOpen((s) => !s)}
               className={cx(
                 "md:hidden",
+                "relative z-[60]", // ensure above overlay so X is always clickable
                 "inline-flex items-center justify-center",
-                "h-10 w-10 rounded-2xl border border-black/10 bg-white/90",
-                "shadow-[10px_10px_22px_rgba(0,0,0,0.10),_-10px_-10px_22px_rgba(255,255,255,0.95)]",
+                "h-10 w-10 rounded-2xl border border-black/15 bg-white",
                 "active:scale-[0.98] transition-transform"
               )}
             >
@@ -317,16 +319,13 @@ export default function Page() {
 
         {/* Mobile menu overlay */}
         <div
-          className={cx(
-            "md:hidden",
-            menuOpen ? "pointer-events-auto" : "pointer-events-none"
-          )}
+          className={cx("md:hidden", menuOpen ? "pointer-events-auto" : "pointer-events-none")}
           aria-hidden={!menuOpen}
         >
-          {/* Backdrop */}
+          {/* Backdrop (lower than header/menu button) */}
           <div
             className={cx(
-              "fixed inset-0 z-20 bg-black/20 backdrop-blur-[2px] transition-opacity",
+              "fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px] transition-opacity",
               menuOpen ? "opacity-100" : "opacity-0"
             )}
           />
@@ -336,7 +335,7 @@ export default function Page() {
             id="mobile-menu-panel"
             ref={menuPanelRef}
             className={cx(
-              "fixed left-1/2 top-[68px] z-30 w-[min(560px,calc(100%-24px))] -translate-x-1/2",
+              "fixed left-1/2 top-[72px] z-40 w-[min(560px,calc(100%-24px))] -translate-x-1/2",
               "rounded-[28px] border border-black/10 bg-white/92 backdrop-blur-md",
               "shadow-[18px_18px_40px_rgba(0,0,0,0.12),_-18px_-18px_40px_rgba(255,255,255,0.95)]",
               "transition-all duration-200",
@@ -344,7 +343,7 @@ export default function Page() {
             )}
           >
             <div className="p-3">
-              {/* Top row: quick actions */}
+              {/* Quick actions */}
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   href="#how"
@@ -385,7 +384,7 @@ export default function Page() {
                 ))}
               </div>
 
-              {/* Bottom: legal */}
+              {/* Legal */}
               <div className="mt-3 rounded-2xl border border-black/10 bg-white/80 p-3">
                 <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold text-neutral-700">
                   <Link href="/policies/terms" target="_blank" rel="noopener noreferrer">
@@ -429,11 +428,10 @@ export default function Page() {
 
               <p className="mt-3 max-w-xl text-[15px] sm:text-[15.5px] font-normal leading-[1.75] text-neutral-700">
                 6chatting removes language barriers for business, friendship, and global
-                connection. Choose your language at sign-up — conversations are delivered
-                in the receiver’s language instantly.
+                connection. Choose your language at sign-up — conversations are delivered in
+                the receiver’s language instantly.
               </p>
 
-              {/* CTA */}
               <div id="download" className="mt-6 grid gap-2 sm:flex sm:flex-wrap sm:gap-2">
                 <Button
                   variant="primary"
@@ -478,45 +476,36 @@ export default function Page() {
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <FadeIn delayMs={60}>
               <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+                <h3 className="text-base font-bold text-black" style={{ fontFamily: "var(--font-display)" }}>
                   1) Choose your language
                 </h3>
                 <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
-                  Pick your preferred language at sign-up. Change it anytime in settings.
-                  Sign-up using your email, create a unique password, verify your email.
+                  Pick your preferred language at sign-up. Change it anytime in settings. Sign-up
+                  using your email, create a unique password, verify your email.
                 </p>
               </BevelCard>
             </FadeIn>
 
             <FadeIn delayMs={120}>
               <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+                <h3 className="text-base font-bold text-black" style={{ fontFamily: "var(--font-display)" }}>
                   2) Chat or call normally
                 </h3>
                 <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
-                  Start a chat — search for users via their email address. Type or speak
-                  naturally. Text translates automatically.
+                  Start a chat — search for users via their email address. Type or speak naturally.
+                  Text translates automatically.
                 </p>
               </BevelCard>
             </FadeIn>
 
             <FadeIn delayMs={180}>
               <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+                <h3 className="text-base font-bold text-black" style={{ fontFamily: "var(--font-display)" }}>
                   3) Delivered in the receiver’s language
                 </h3>
                 <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
-                  The receiver automatically gets your text translated in real time. This
-                  is the future of communication.
+                  The receiver automatically gets your text translated in real time. This is the
+                  future of communication.
                 </p>
               </BevelCard>
             </FadeIn>
@@ -537,10 +526,7 @@ export default function Page() {
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <FadeIn delayMs={60}>
               <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+                <h3 className="text-base font-bold text-black" style={{ fontFamily: "var(--font-display)" }}>
                   Instant translation chat
                 </h3>
                 <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
@@ -551,10 +537,7 @@ export default function Page() {
 
             <FadeIn delayMs={120}>
               <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+                <h3 className="text-base font-bold text-black" style={{ fontFamily: "var(--font-display)" }}>
                   Voice + calling translation
                 </h3>
                 <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
@@ -565,15 +548,11 @@ export default function Page() {
 
             <FadeIn delayMs={180}>
               <BevelCard className="p-5 sm:p-6">
-                <h3
-                  className="text-base font-bold text-black"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+                <h3 className="text-base font-bold text-black" style={{ fontFamily: "var(--font-display)" }}>
                   Safety and trust
                 </h3>
                 <p className="mt-2 text-sm font-normal leading-[1.75] text-neutral-700">
-                  Public policies, community rules, and anti-fraud protections aligned with
-                  the app.
+                  Public policies, community rules, and anti-fraud protections aligned with the app.
                 </p>
               </BevelCard>
             </FadeIn>
@@ -590,21 +569,13 @@ export default function Page() {
               <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer">
                 Privacy Policy
               </Link>
-              <Link
-                href="/policies/subscription-billing"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Link href="/policies/subscription-billing" target="_blank" rel="noopener noreferrer">
                 Subscription & Billing
               </Link>
               <Link href="/policies/refunds" target="_blank" rel="noopener noreferrer">
                 Refund & Cancellation
               </Link>
-              <Link
-                href="/policies/acceptable-use"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Link href="/policies/acceptable-use" target="_blank" rel="noopener noreferrer">
                 Acceptable Use
               </Link>
               <Link href="/policies/contact" target="_blank" rel="noopener noreferrer">
@@ -613,8 +584,7 @@ export default function Page() {
             </div>
 
             <div className="mt-5 text-center text-xs font-normal text-neutral-600">
-              © {year} 6chatting. <span className="mx-1">A 6clement Joshua Service.</span>
-              All rights reserved.
+              © {year} 6chatting. <span className="mx-1">A 6clement Joshua Service.</span> All rights reserved.
             </div>
           </div>
         </footer>
@@ -636,7 +606,7 @@ export default function Page() {
           }
         `}</style>
 
-        {/* Global: fonts + premium iOS-safe touch + mobile header spacing */}
+        {/* Global styles */}
         <style jsx global>{`
           :root {
             --font-sans: ${inter.style.fontFamily};
@@ -648,13 +618,59 @@ export default function Page() {
             text-rendering: optimizeLegibility;
           }
 
-          /* iOS/Safari polish */
           button,
           a {
             -webkit-tap-highlight-color: transparent;
           }
 
-          /* ✅ Mobile-only: smaller pill button for header CTA */
+          /* Hide horizontal scrollbar (desktop nav can scroll if needed, avoids overlap) */
+          .no-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+
+          /* Desktop nav pill: FLAT by default, water effect ONLY on hover */
+          .nav-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+
+            padding: 7px 12px;          /* smaller so it never covers text */
+            border-radius: 999px;
+            border: 1px solid rgba(0,0,0,0.10);
+            background: rgba(255,255,255,0.70);
+
+            font-size: 13px;            /* smaller desktop text */
+            font-weight: 650;
+            letter-spacing: -0.01em;
+            color: rgba(17,17,17,0.92);
+
+            box-shadow: none;           /* ✅ remove 3D effect */
+            transition: box-shadow 160ms ease, background 160ms ease, transform 160ms ease;
+          }
+          .nav-pill:hover {
+            background: rgba(255,255,255,0.92);
+            /* ✅ apply premium “water” feel ONLY on hover */
+            box-shadow:
+              10px 10px 22px rgba(0,0,0,0.10),
+              -10px -10px 22px rgba(255,255,255,0.95);
+          }
+          .nav-pill:active {
+            transform: scale(0.99);
+          }
+          .nav-pill:focus-visible {
+            outline: none;
+            box-shadow:
+              0 0 0 3px rgba(0,0,0,0.08),
+              10px 10px 22px rgba(0,0,0,0.10),
+              -10px -10px 22px rgba(255,255,255,0.95);
+          }
+
+          /* Keep your mobile get-app button tweak (still used on sm+ for “Get the app”) */
           @media (max-width: 640px) {
             .get-app-btn {
               padding: 8px 14px !important;
