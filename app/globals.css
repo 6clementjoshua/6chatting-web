@@ -221,3 +221,14 @@ a:active {
     transition: none !important;
   }
 }
+
+/* Mobile-only: smaller pill button for header CTA */
+@media (max-width: 640px) {
+  .get-app-btn {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    border-radius: 999px !important;
+    /* pill */
+    min-height: auto !important;
+  }
+}

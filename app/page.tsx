@@ -47,19 +47,18 @@ const Button = ({
   onClick,
   href,
   variant = "default",
-  fullOnMobile = false,
+  className = "",
 }: {
   children: React.ReactNode;
   href?: string;
   onClick?: () => void;
   variant?: "default" | "primary";
-  fullOnMobile?: boolean;
+  className?: string;
 }) => {
   const base =
     "water-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold tracking-[-0.01em]";
   const primary = "water-btn-primary";
-  const mobileFull = fullOnMobile ? "w-full sm:w-auto" : "";
-  const cls = `${base} ${variant === "primary" ? primary : ""} ${mobileFull}`;
+  const cls = `${base} ${variant === "primary" ? primary : ""} ${className}`;
 
   if (href) {
     return (
@@ -112,8 +111,6 @@ export default function Page() {
       <header className="sticky top-0 z-10 border-b border-black/5 bg-white/85 backdrop-blur-md">
         <div className="mx-auto flex w-[min(1120px,calc(100%-24px))] items-center justify-between py-3 sm:py-4">
           <Link href="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* IMPORTANT: ensure the file in /public matches this name EXACTLY.
-                Rename your file to: public/6logo.png (lowercase) */}
             <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-2xl border border-black/10 bg-white p-1 shadow-[10px_10px_22px_rgba(0,0,0,0.10),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
               <Image
                 src="/6logo.PNG"
@@ -138,13 +135,17 @@ export default function Page() {
             </div>
           </Link>
 
-          {/* Mobile: keep nav clean, no wrap mess */}
           <nav className="flex items-center gap-2 shrink-0">
             <div className="hidden sm:block">
               <Button href="#how">How it works</Button>
             </div>
 
-            <Button variant="primary" onClick={() => setWaitlistOpen(true)}>
+            {/* ✅ Mobile smaller pill */}
+            <Button
+              variant="primary"
+              onClick={() => setWaitlistOpen(true)}
+              className="get-app-btn"
+            >
               Get the app
             </Button>
           </nav>
@@ -178,14 +179,13 @@ export default function Page() {
                 <Button
                   variant="primary"
                   onClick={() => setWaitlistOpen(true)}
-                  fullOnMobile
+                  className="w-full sm:w-auto"
                 >
                   Download (Coming Soon)
                 </Button>
 
-                {/* On mobile, show "How it works" here instead of header */}
                 <div className="sm:hidden">
-                  <Button href="#how" fullOnMobile>
+                  <Button href="#how" className="w-full">
                     How it works
                   </Button>
                 </div>
@@ -320,7 +320,7 @@ export default function Page() {
           </div>
         </section>
 
-        {/* FOOTER (already good; keep centered) */}
+        {/* FOOTER */}
         <footer className="pt-10 text-neutral-700">
           <div className="border-t border-black/10 pt-6">
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-medium">
@@ -362,7 +362,6 @@ export default function Page() {
 
         <WaitlistModal open={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
 
-        {/* Faster, premium reveal */}
         <style>{`
           .reveal {
             opacity: 0;
@@ -377,7 +376,7 @@ export default function Page() {
           }
         `}</style>
 
-        {/* Typography tokens */}
+        {/* Typography + mobile button tweak */}
         <style jsx global>{`
           :root {
             --font-sans: ${inter.style.fontFamily};
@@ -386,6 +385,16 @@ export default function Page() {
           html {
             -webkit-text-size-adjust: 100%;
             text-rendering: optimizeLegibility;
+          }
+
+          /* ✅ Mobile-only: smaller pill button for header CTA */
+          @media (max-width: 640px) {
+            .get-app-btn {
+              padding: 8px 14px !important;
+              font-size: 13px !important;
+              border-radius: 999px !important;
+              min-height: auto !important;
+            }
           }
         `}</style>
       </main>
