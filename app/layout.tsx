@@ -1,6 +1,8 @@
+// app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Header from "./components/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,12 +45,6 @@ export const metadata: Metadata = {
   referrer: "strict-origin-when-cross-origin",
 
   // ✅ Favicon + icons (ensure these files exist in /public)
-  // public/favicon.ico
-  // public/favicon-16x16.png
-  // public/favicon-32x32.png
-  // public/favicon-96x96.png (optional)
-  // public/apple-icon-180x180.png (or apple-icon.png if that’s what you have)
-  // public/manifest.json (optional)
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" }, // best fallback
@@ -90,6 +86,7 @@ export const metadata: Metadata = {
     "Nigeria tech",
     "Cross-border communication",
     "business messaging translation",
+    "international chat",
   ],
 
   robots: {
@@ -142,12 +139,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
- return (
-  <html lang="en" className="light">
-    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      {children}
-    </body>
-  </html>
-);
-
+  return (
+    <html lang="en" className="light">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* Persistent header across ALL pages */}
+        <Header />
+        {children}
+      </body>
+    </html>
+  );
 }
