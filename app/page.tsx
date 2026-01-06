@@ -356,10 +356,15 @@ export default function Page() {
                 sign-up — conversations are delivered in the receiver’s language instantly.
               </p>
 
-              <div id="download" className="mt-6 grid gap-2 sm:flex sm:flex-wrap sm:gap-2">
-                <Button variant="primary" onClick={() => setWaitlistOpen(true)} className="w-full sm:w-auto">
+              <div id="download" className="mt-6 grid gap-2">
+                <Button
+                  variant="primary"
+                  onClick={() => setWaitlistOpen(true)}
+                  className="w-full max-w-[720px] mx-auto"
+                >
                   Download Now
                 </Button>
+
 
                 {/* ✅ This is now the ONLY "How it works" control (mobile CTA under Download) */}
                 <div className="sm:hidden">
