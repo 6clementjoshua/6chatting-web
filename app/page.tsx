@@ -19,8 +19,6 @@ const DESKTOP_NAV = [
   { label: "Help Center", href: "/help" },
   { label: "Jobs", href: "/jobs" },
   { label: "Pricing", href: "/pricing" },
-  { label: "Status", href: "/status" },
-  { label: "Developers", href: "/developers" },
 ];
 
 const FEATURE_PILLS = [
