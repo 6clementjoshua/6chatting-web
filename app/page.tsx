@@ -15,6 +15,7 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
 });
 
+/** Desktop links (md+) */
 const DESKTOP_NAV = [
   { label: "Personal", href: "/personal" },
   { label: "Business", href: "/business" },
@@ -28,6 +29,13 @@ const DESKTOP_NAV = [
 
 function cx(...parts: Array<string | false | undefined | null>) {
   return parts.filter(Boolean).join(" ");
+}
+
+/** Smooth scroll for in-page anchors (fixes “How it works” on mobile sometimes not scrolling) */
+function scrollToId(id: string) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function useOnClickOutside(
@@ -58,7 +66,7 @@ function useOnClickOutside(
 const Pill = ({ children }: { children: React.ReactNode }) => (
   <span
     className={cx(
-      "inline-flex items-center gap-2 rounded-full",
+      "inline-flex items-center justify-center rounded-full",
       "border border-black/10 bg-white/95 px-3 py-2",
       "text-xs font-medium text-black/90",
       "shadow-[6px_6px_14px_rgba(0,0,0,0.10),_-6px_-6px_14px_rgba(255,255,255,0.95)]",
@@ -126,6 +134,7 @@ const FadeIn = ({
   </div>
 );
 
+/** Icons (no deps) */
 function IconMenu({ className = "" }: { className?: string }) {
   return (
     <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -202,10 +211,10 @@ export default function Page() {
     >
       {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-black/5 bg-white/85 backdrop-blur-md">
-        {/* ✅ Use a 3-column grid so nothing overlaps the tagline/nav/buttons */}
-        <div className="mx-auto grid w-[min(1120px,calc(100%-24px))] grid-cols-[auto_1fr_auto] items-center gap-3 py-3 sm:py-4">
-          {/* Left: logo + wordmark (allowed to shrink, always truncates) */}
-          <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3">
+        {/* ✅ Grid layout prevents the nav from “stealing” space from logo/tagline */}
+        <div className="mx-auto grid w-[min(1120px,calc(100%-24px))] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-3 sm:py-4">
+          {/* Left: logo + wordmark */}
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-2xl border border-black/10 bg-white p-1 shadow-[10px_10px_22px_rgba(0,0,0,0.10),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
               <Image
                 src="/6logo.PNG"
@@ -217,23 +226,23 @@ export default function Page() {
               />
             </div>
 
-            {/* ✅ Hard cap width so tagline never gets covered */}
-            <div className="min-w-0 max-w-[210px] sm:max-w-[260px] lg:max-w-[320px] leading-tight">
+            {/* ✅ Tagline must show FULL text on mobile: allow wrapping + no truncate */}
+            <div className="leading-tight min-w-0">
               <div
-                className="truncate text-sm font-semibold tracking-[-0.01em] text-black"
+                className="text-sm font-semibold tracking-[-0.01em] text-black"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 6chatting
               </div>
-              <div className="truncate text-xs font-medium text-neutral-700">
+              <div className="text-[12px] font-medium text-neutral-700 leading-snug break-words whitespace-normal">
                 Connect. Translate. Communicate.
               </div>
             </div>
           </Link>
 
-          {/* Center: desktop nav (md+) — scrolls if tight, never overlaps left/right */}
-          <nav className="hidden min-w-0 md:block">
-            <div className="flex min-w-0 items-center justify-center gap-2 overflow-x-auto no-scrollbar whitespace-nowrap px-1">
+          {/* Desktop nav (md+) — fix cut-off text by allowing scroll + tighter paddings */}
+          <nav className="hidden md:block min-w-0">
+            <div className="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar whitespace-nowrap px-1">
               {DESKTOP_NAV.map((item) => (
                 <Link key={item.href} href={item.href} className="nav-pill">
                   {item.label}
@@ -242,14 +251,19 @@ export default function Page() {
             </div>
           </nav>
 
-          {/* Right: actions */}
-          <div className="flex items-center justify-end gap-2">
-            {/* ✅ Desktop: make “How it works” same size as nav pills */}
-            <Link href="#how" className="hidden sm:inline-flex how-pill">
+          {/* Right actions */}
+          <div className="flex items-center justify-end gap-2 shrink-0">
+            {/* Desktop: How it works (same size as nav pills) */}
+            <button
+              type="button"
+              onClick={() => scrollToId("how")}
+              className="hidden sm:inline-flex nav-pill"
+              aria-label="How it works"
+            >
               How it works
-            </Link>
+            </button>
 
-            {/* Mobile: download icon instead of text */}
+            {/* Mobile: download icon */}
             <button
               type="button"
               onClick={() => setWaitlistOpen(true)}
@@ -257,7 +271,7 @@ export default function Page() {
               className={cx(
                 "sm:hidden",
                 "inline-flex items-center justify-center",
-                "h-10 w-10 rounded-full",
+                "h-8 w-8 rounded-full",
                 "border border-black/15 bg-white",
                 "active:scale-[0.98] transition-transform"
               )}
@@ -265,14 +279,14 @@ export default function Page() {
               <IconDownloadSolid className="text-black" />
             </button>
 
-            {/* Desktop: keep primary CTA */}
+            {/* Desktop: primary CTA */}
             <div className="hidden sm:block">
               <Button variant="primary" onClick={() => setWaitlistOpen(true)} className="get-app-btn">
                 Get the app
               </Button>
             </div>
 
-            {/* Mobile menu button — flat, always clickable */}
+            {/* Mobile menu button (flat) */}
             <button
               ref={menuBtnRef}
               type="button"
@@ -301,6 +315,7 @@ export default function Page() {
               menuOpen ? "opacity-100" : "opacity-0"
             )}
           />
+
           <div
             id="mobile-menu-panel"
             ref={menuPanelRef}
@@ -314,9 +329,19 @@ export default function Page() {
           >
             <div className="p-3">
               <div className="grid grid-cols-2 gap-2">
-                <Button href="#how" className="w-full py-2.5" onClick={() => setMenuOpen(false)}>
+                {/* ✅ Mobile “How it works” now reliably scrolls */}
+                <button
+                  type="button"
+                  className="water-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold tracking-[-0.01em] select-none w-full"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    // allow panel to close first, then scroll
+                    setTimeout(() => scrollToId("how"), 60);
+                  }}
+                >
                   How it works
-                </Button>
+                </button>
+
                 <Button href="/pricing" className="w-full py-2.5" onClick={() => setMenuOpen(false)}>
                   Pricing
                 </Button>
@@ -390,17 +415,33 @@ export default function Page() {
                 </Button>
 
                 <div className="sm:hidden">
-                  <Button href="#how" className="w-full" onClick={() => setMenuOpen(false)}>
+                  <Button
+                    href="#how"
+                    className="w-full"
+                    onClick={() => {
+                      scrollToId("how");
+                    }}
+                  >
                     How it works
                   </Button>
                 </div>
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Pill>Instant chat translation</Pill>
-                <Pill>Voice & calling translation</Pill>
-                <Pill>Cross-border business friendly</Pill>
-                <Pill>Premier & Premium plans</Pill>
+              {/* ✅ Mobile-only V-shape pills (centered), desktop unchanged */}
+              <div className="mt-5">
+                <div className="hidden sm:flex flex-wrap gap-2">
+                  <Pill>Instant chat translation</Pill>
+                  <Pill>Voice & calling translation</Pill>
+                  <Pill>Cross-border business friendly</Pill>
+                  <Pill>Premier & Premium plans</Pill>
+                </div>
+
+                <div className="sm:hidden v-pills">
+                  <Pill>Instant chat translation</Pill>
+                  <Pill>Voice & calling translation</Pill>
+                  <Pill>Cross-border business friendly</Pill>
+                  <Pill>Premier & Premium plans</Pill>
+                </div>
               </div>
             </BevelCard>
           </FadeIn>
@@ -411,7 +452,7 @@ export default function Page() {
         </section>
 
         {/* HOW IT WORKS */}
-        <section id="how" className="pt-8">
+        <section id="how" className="pt-8 scroll-mt-24">
           <FadeIn delayMs={0}>
             <h2 className="text-lg font-bold tracking-[-0.02em] text-black" style={{ fontFamily: "var(--font-display)" }}>
               How 6chatting works
@@ -459,7 +500,8 @@ export default function Page() {
         {/* FOOTER */}
         <footer className="pt-10 text-neutral-700">
           <div className="border-t border-black/10 pt-6">
-            <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-medium">
+            {/* ✅ Smaller “premium” policy links */}
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[12.5px] font-semibold">
               <Link href="/policies/terms" target="_blank" rel="noopener noreferrer">
                 Terms of Service
               </Link>
@@ -511,6 +553,7 @@ export default function Page() {
           html {
             -webkit-text-size-adjust: 100%;
             text-rendering: optimizeLegibility;
+            scroll-behavior: smooth;
           }
 
           button,
@@ -533,64 +576,51 @@ export default function Page() {
             justify-content: center;
             white-space: nowrap;
 
-            padding: 7px 12px;
+            padding: 6px 11px; /* tighter => prevents “Personal/Developers” cutting */
             border-radius: 999px;
-            border: 1px solid rgba(0,0,0,0.10);
-            background: rgba(255,255,255,0.70);
+            border: 1px solid rgba(0, 0, 0, 0.10);
+            background: transparent; /* ✅ remove filled background so text reads clean */
+            color: rgba(17, 17, 17, 0.92);
 
             font-size: 13px;
             font-weight: 650;
             letter-spacing: -0.01em;
-            color: rgba(17,17,17,0.92);
 
             box-shadow: none;
             transition: box-shadow 160ms ease, background 160ms ease, transform 160ms ease;
           }
+
           .nav-pill:hover {
-            background: rgba(255,255,255,0.92);
+            background: rgba(255, 255, 255, 0.92);
             box-shadow:
-              10px 10px 22px rgba(0,0,0,0.10),
-              -10px -10px 22px rgba(255,255,255,0.95);
+              10px 10px 22px rgba(0, 0, 0, 0.10),
+              -10px -10px 22px rgba(255, 255, 255, 0.95);
           }
-          .nav-pill:active { transform: scale(0.99); }
+
+          .nav-pill:active {
+            transform: scale(0.99);
+          }
+
           .nav-pill:focus-visible {
             outline: none;
             box-shadow:
-              0 0 0 3px rgba(0,0,0,0.08),
-              10px 10px 22px rgba(0,0,0,0.10),
-              -10px -10px 22px rgba(255,255,255,0.95);
+              0 0 0 3px rgba(0, 0, 0, 0.08),
+              10px 10px 22px rgba(0, 0, 0, 0.10),
+              -10px -10px 22px rgba(255, 255, 255, 0.95);
           }
 
-          /* ✅ “How it works” matches nav-pill sizing */
-          .how-pill {
-            padding: 7px 12px;
-            border-radius: 999px;
-            border: 1px solid rgba(0,0,0,0.10);
-            background: rgba(255,255,255,0.70);
-
-            font-size: 13px;
-            font-weight: 650;
-            letter-spacing: -0.01em;
-            color: rgba(17,17,17,0.92);
-
-            box-shadow: none;
-            transition: box-shadow 160ms ease, background 160ms ease, transform 160ms ease;
+          /* ✅ Mobile V-shape pill layout */
+          .v-pills {
+            display: grid;
+            justify-items: center;
+            gap: 10px;
           }
-          .how-pill:hover {
-            background: rgba(255,255,255,0.92);
-            box-shadow:
-              10px 10px 22px rgba(0,0,0,0.10),
-              -10px -10px 22px rgba(255,255,255,0.95);
-          }
-          .how-pill:active { transform: scale(0.99); }
-          .how-pill:focus-visible {
-            outline: none;
-            box-shadow:
-              0 0 0 3px rgba(0,0,0,0.08),
-              10px 10px 22px rgba(0,0,0,0.10),
-              -10px -10px 22px rgba(255,255,255,0.95);
-          }
+          .v-pills > span:nth-child(1) { width: 92%; }
+          .v-pills > span:nth-child(2) { width: 84%; }
+          .v-pills > span:nth-child(3) { width: 76%; }
+          .v-pills > span:nth-child(4) { width: 68%; }
 
+          /* Keep desktop CTA tweak if you still want it */
           @media (max-width: 640px) {
             .get-app-btn {
               padding: 8px 14px !important;
