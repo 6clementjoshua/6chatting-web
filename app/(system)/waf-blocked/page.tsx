@@ -40,10 +40,6 @@ export default function WafBlockedPage() {
                 </p>
 
                 <div className="actions">
-                    <a className="btn primary" href="https://www.6chatting.com/">
-                        Back to Home
-                    </a>
-
                     <a className="btn" href="mailto:support@6chatting.com?subject=6chatting%20WAF%20Block%20Help">
                         Contact Support
                     </a>

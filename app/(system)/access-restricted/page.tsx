@@ -1,66 +1,55 @@
 import Image from "next/image";
 
 function cx(...parts: Array<string | false | undefined | null>) {
-    return parts.filter(Boolean).join(" ");
+  return parts.filter(Boolean).join(" ");
 }
 
 function LogoBadge({ size = 56, className = "" }: { size?: number; className?: string }) {
-    return (
-        <div
-            className={cx("logoBadge", className)}
-            style={{ width: size, height: size }}
-            aria-hidden="true"
-        >
-            <Image src="/6logo.PNG" alt="6chatting" fill sizes={`${size}px`} className="object-contain" priority />
-        </div>
-    );
+  return (
+    <div className={cx("logoBadge", className)} style={{ width: size, height: size }} aria-hidden="true">
+      <Image src="/6logo.PNG" alt="6chatting" fill sizes={`${size}px`} className="object-contain" priority />
+    </div>
+  );
 }
 
 export default function AccessRestrictedPage() {
-    return (
-        <main className="wrap">
-            <section className="card" role="status" aria-live="polite">
-                <div className="top">
-                    <LogoBadge />
-                </div>
+  return (
+    <main className="wrap">
+      <section className="card" role="status" aria-live="polite">
+        <div className="top">
+          <LogoBadge />
+        </div>
 
-                <h1 className="title">Access Restricted</h1>
+        <h1 className="title">Access Restricted</h1>
 
-                <p className="text">
-                    Sorry — access to <b>6chatting</b> is currently limited for some locations or networks to protect our platform.
-                    If you believe this is a mistake, please contact support and we’ll help you.
-                </p>
+        <p className="text">
+          Sorry — access to <b>6chatting</b> is currently limited for some locations or networks to protect our platform.
+          If you believe this is a mistake, please contact support and we’ll help you.
+        </p>
 
-                <div className="actions">
-                    <a className="btn primary" href="https://www.6chatting.com/">
-                        Back to Home
-                    </a>
+        <div className="actions">
+          <a className="btn primary" href="mailto:support@6chatting.com?subject=6chatting%20Access%20Restricted%20Help">
+            Contact Support
+          </a>
+        </div>
 
-                    <a
-                        className="btn"
-                        href="mailto:support@6chatting.com?subject=6chatting%20Access%20Restricted%20Help"
-                    >
-                        Contact Support
-                    </a>
-                </div>
+        <div className="note">
+          <div className="noteTitle">Helpful notes</div>
+          <div className="noteText">
+            • If you’re using a VPN or proxy, try turning it off and reload.<br />
+            • If you’re on a shared network, some traffic may look unusual.<br />
+            • If Cloudflare shows a <b>Ray ID</b>, include it in your email — it helps us resolve issues faster.
+          </div>
+        </div>
 
-                <div className="note">
-                    <div className="noteTitle">Helpful notes</div>
-                    <div className="noteText">
-                        • If you’re using a VPN or proxy, try turning it off and reload.<br />
-                        • If you’re on a shared network, some traffic may look unusual.<br />
-                        • If Cloudflare shows a <b>Ray ID</b>, include it in your email — it helps us resolve issues faster.
-                    </div>
-                </div>
+        <div className="footer">
+          <div>6Clement Joshua</div>
+          <div>Cross River State, Calabar, Nigeria</div>
+          <div className="muted">© 6chatting. All rights reserved.</div>
+        </div>
+      </section>
 
-                <div className="footer">
-                    <div>6Clement Joshua</div>
-                    <div>Cross River State, Calabar, Nigeria</div>
-                    <div className="muted">© 6chatting. All rights reserved.</div>
-                </div>
-            </section>
-
-            <style>{`
+      <style>{`
         :root { color-scheme: light; }
         .wrap{
           min-height: 100dvh;
@@ -188,6 +177,6 @@ export default function AccessRestrictedPage() {
           }
         }
       `}</style>
-        </main>
-    );
+    </main>
+  );
 }
