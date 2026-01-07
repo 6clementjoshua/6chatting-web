@@ -46,24 +46,43 @@ type WorkMode = "Onsite" | "Hybrid" | "Remote";
 type EmploymentType = "Full-time" | "Part-time" | "Remote";
 type Shift = "Day" | "Night" | "Rotational";
 
+type PayBandUSD = {
+    fullTime: { min: number; max: number };
+    partTime: { min: number; max: number };
+    /** optional, for future (disabled now) */
+    remote?: { min: number; max: number };
+    period: "month";
+};
+
 type Job = {
     id: string;
     title: string;
     dept: string;
-    location: string; // e.g. Calabar, Nigeria
+    location: string;
     workMode: WorkMode;
+
     isOpen: boolean; // green dot
-    remoteAvailable: boolean; // remote availability
-    employmentTypes: EmploymentType[];
+    remoteAvailable: boolean; // remote availability (should be false for now)
+
+    employmentTypes: EmploymentType[]; // still shows all (remote disabled visually)
     shifts: Shift[];
-    payUSD: { min: number; max: number; period: "month" | "year" };
+
+    payUSD: PayBandUSD;
+
     summary: string;
     qualifications: string[];
     responsibilities: string[];
 };
 
+/**
+ * Salary policy (monthly):
+ * - Keep within your hints: min >= ~₦25k, max <= ~₦5m
+ * - Part-time should be clearly lower than full-time
+ *
+ * Note: Pay is shown as a range for transparency.
+ */
 const JOBS: Job[] = [
-    // Executive / Leadership
+    // Executive / Leadership (Full-time only; part-time shown but realistically low/rare; remote disabled)
     {
         id: "coo",
         title: "Chief Operating Officer (COO)",
@@ -74,7 +93,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day"],
-        payUSD: { min: 6000, max: 12000, period: "month" },
+        payUSD: {
+            fullTime: { min: 1800, max: 3000 }, // ≈ ₦2.9m–₦4.8m
+            partTime: { min: 700, max: 1200 },  // ≈ ₦1.1m–₦1.9m (advisory/partial)
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Own operations, execution, hiring velocity, and delivery across teams.",
         qualifications: [
             "8+ years leadership experience (operations or scaling tech orgs)",
@@ -99,7 +123,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day"],
-        payUSD: { min: 7000, max: 15000, period: "month" },
+        payUSD: {
+            fullTime: { min: 2000, max: 3125 }, // ≈ ₦3.2m–₦5.0m
+            partTime: { min: 800, max: 1400 },  // ≈ ₦1.3m–₦2.2m
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Lead architecture, security posture, and engineering excellence at scale.",
         qualifications: [
             "10+ years engineering experience; 4+ leading teams",
@@ -115,7 +144,7 @@ const JOBS: Job[] = [
         ],
     },
 
-    // Engineering
+    // Engineering (Full-time + Part-time; remote disabled)
     {
         id: "frontend-nextjs",
         title: "Frontend Engineer (Next.js)",
@@ -126,7 +155,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day"],
-        payUSD: { min: 1200, max: 3500, period: "month" },
+        payUSD: {
+            fullTime: { min: 500, max: 1000 }, // ≈ ₦800k–₦1.6m
+            partTime: { min: 200, max: 450 },  // ≈ ₦320k–₦720k
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Build premium web UX, performance, and UI systems.",
         qualifications: [
             "Strong React + Next.js (App Router) experience",
@@ -151,7 +185,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day"],
-        payUSD: { min: 1200, max: 3500, period: "month" },
+        payUSD: {
+            fullTime: { min: 500, max: 1000 },
+            partTime: { min: 200, max: 450 },
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Ship the mobile app: chat UX, performance, and platform integrations.",
         qualifications: [
             "Flutter + Dart proficiency; state management patterns",
@@ -176,7 +215,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day"],
-        payUSD: { min: 1500, max: 4500, period: "month" },
+        payUSD: {
+            fullTime: { min: 650, max: 1250 }, // ≈ ₦1.0m–₦2.0m
+            partTime: { min: 260, max: 520 },  // ≈ ₦416k–₦832k
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Build APIs, data models, and scalable services (chat, verification, moderation).",
         qualifications: [
             "Strong backend fundamentals (APIs, DB, caching, queues)",
@@ -201,7 +245,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day", "Rotational"],
-        payUSD: { min: 1800, max: 5000, period: "month" },
+        payUSD: {
+            fullTime: { min: 700, max: 1400 }, // ≈ ₦1.1m–₦2.2m
+            partTime: { min: 280, max: 600 },  // ≈ ₦448k–₦960k
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Uptime, deployments, monitoring, and incident response—done professionally.",
         qualifications: [
             "CI/CD, monitoring, logs, tracing fundamentals",
@@ -217,7 +266,7 @@ const JOBS: Job[] = [
         ],
     },
 
-    // Trust & Safety / Support
+    // Trust & Safety / Support (shift-based; full-time + part-time; remote disabled)
     {
         id: "trust-safety-moderator",
         title: "Trust & Safety Moderator (Shift-based)",
@@ -228,7 +277,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day", "Night", "Rotational"],
-        payUSD: { min: 300, max: 900, period: "month" },
+        payUSD: {
+            fullTime: { min: 150, max: 300 }, // ≈ ₦240k–₦480k
+            partTime: { min: 80, max: 140 },  // ≈ ₦128k–₦224k
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Review reports, enforce policy, and keep the platform safe.",
         qualifications: [
             "Strong judgment, calm decision making, high integrity",
@@ -253,7 +307,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day", "Night", "Rotational"],
-        payUSD: { min: 250, max: 800, period: "month" },
+        payUSD: {
+            fullTime: { min: 140, max: 280 }, // ≈ ₦224k–₦448k
+            partTime: { min: 70, max: 130 },  // ≈ ₦112k–₦208k
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Support users, resolve issues, and protect quality of experience.",
         qualifications: [
             "Excellent communication and patience",
@@ -269,7 +328,7 @@ const JOBS: Job[] = [
         ],
     },
 
-    // Operations / Facilities / Logistics
+    // Operations / Facilities / Logistics (full-time + part-time; remote disabled)
     {
         id: "cleaner",
         title: "Office Cleaner",
@@ -280,7 +339,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day"],
-        payUSD: { min: 120, max: 250, period: "month" },
+        payUSD: {
+            fullTime: { min: 40, max: 90 }, // ≈ ₦64k–₦144k
+            partTime: { min: 25, max: 55 }, // ≈ ₦40k–₦88k
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Maintain a clean, professional office environment.",
         qualifications: ["Reliable and punctual", "Basic hygiene and cleaning standards", "Respectful and trustworthy"],
         responsibilities: ["Daily cleaning and waste disposal", "Sanitize common areas", "Restock basic supplies"],
@@ -295,7 +359,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day"],
-        payUSD: { min: 200, max: 600, period: "month" },
+        payUSD: {
+            fullTime: { min: 90, max: 200 },  // ≈ ₦144k–₦320k
+            partTime: { min: 45, max: 110 },  // ≈ ₦72k–₦176k
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Provide meals and maintain kitchen cleanliness.",
         qualifications: ["Food hygiene knowledge", "Ability to plan simple menus", "Cleanliness and consistency"],
         responsibilities: ["Prepare meals and beverages", "Maintain kitchen hygiene", "Manage pantry inventory"],
@@ -310,7 +379,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day", "Rotational"],
-        payUSD: { min: 180, max: 500, period: "month" },
+        payUSD: {
+            fullTime: { min: 80, max: 160 }, // ≈ ₦128k–₦256k
+            partTime: { min: 40, max: 90 },  // ≈ ₦64k–₦144k
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Transport staff/execs and handle dispatch logistics responsibly.",
         qualifications: ["Valid driver’s license", "Knowledge of Calabar routes", "Professional conduct and safety-first driving"],
         responsibilities: ["Executive transport", "Dispatch errands", "Vehicle cleanliness and basic maintenance checks"],
@@ -325,7 +399,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day", "Night", "Rotational"],
-        payUSD: { min: 180, max: 450, period: "month" },
+        payUSD: {
+            fullTime: { min: 90, max: 180 }, // ≈ ₦144k–₦288k
+            partTime: { min: 45, max: 95 },  // ≈ ₦72k–₦152k
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Protect premises, manage access control, and support incident response.",
         qualifications: ["Alertness and discipline", "Basic incident reporting", "Ability to work night shifts"],
         responsibilities: ["Access control", "Patrols and monitoring", "Incident logging and escalation"],
@@ -340,13 +419,18 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day", "Night", "Rotational"],
-        payUSD: { min: 200, max: 600, period: "month" },
+        payUSD: {
+            fullTime: { min: 110, max: 220 }, // ≈ ₦176k–₦352k
+            partTime: { min: 55, max: 120 },  // ≈ ₦88k–₦192k
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Monitor CCTV feeds and coordinate alerts with on-ground security.",
         qualifications: ["Attention to detail", "Comfort with long monitoring sessions", "Clear reporting and escalation discipline"],
         responsibilities: ["Monitor cameras", "Log suspicious activity", "Coordinate response with guards"],
     },
 
-    // Examples of roles listed but remote disabled (still visible; remote option unavailable)
+    // Marketing (hybrid; full-time + part-time; remote disabled)
     {
         id: "growth-marketer",
         title: "Growth Marketer",
@@ -357,7 +441,12 @@ const JOBS: Job[] = [
         remoteAvailable: false,
         employmentTypes: ["Full-time", "Part-time", "Remote"],
         shifts: ["Day"],
-        payUSD: { min: 700, max: 2200, period: "month" },
+        payUSD: {
+            fullTime: { min: 250, max: 550 }, // ≈ ₦400k–₦880k
+            partTime: { min: 120, max: 280 }, // ≈ ₦192k–₦448k
+            remote: { min: 0, max: 0 },
+            period: "month",
+        },
         summary: "Drive acquisition, conversion, and retention through measurable campaigns.",
         qualifications: ["Performance marketing basics", "Analytics discipline", "Strong copy + positioning skills"],
         responsibilities: ["Run experiments and funnels", "Measure and improve conversion", "Coordinate campaigns with design/content"],
@@ -389,7 +478,24 @@ function formatMoney(amount: number, c: CurrencyInfo) {
 }
 
 function dotClass(open: boolean) {
-    return open ? "bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.18)]" : "bg-neutral-400 shadow-[0_0_0_3px_rgba(115,115,115,0.16)]";
+    return open
+        ? "bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.18)]"
+        : "bg-neutral-400 shadow-[0_0_0_3px_rgba(115,115,115,0.16)]";
+}
+
+function payRangeLabel(job: Job, selectedType: EmploymentType, currency: CurrencyInfo) {
+    const rate = currency.approxRateFromUSD || 1;
+
+    const band =
+        selectedType === "Part-time"
+            ? job.payUSD.partTime
+            : selectedType === "Remote"
+                ? job.payUSD.remote || job.payUSD.fullTime
+                : job.payUSD.fullTime;
+
+    const min = band.min * rate;
+    const max = band.max * rate;
+    return `${formatMoney(min, currency)} – ${formatMoney(max, currency)} /month`;
 }
 
 export default function JobsPage() {
@@ -402,6 +508,8 @@ export default function JobsPage() {
     const [applyJob, setApplyJob] = useState<Job | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [submitMsg, setSubmitMsg] = useState<string | null>(null);
+
+    const [selectedEmploymentType, setSelectedEmploymentType] = useState<EmploymentType>("Full-time");
 
     // Basic Geo/IP currency detection (client-side). Falls back to NGN.
     useEffect(() => {
@@ -426,14 +534,6 @@ export default function JobsPage() {
             mounted = false;
         };
     }, []);
-
-    function payLabel(job: Job) {
-        const rate = currency.approxRateFromUSD || 1;
-        const min = job.payUSD.min * rate;
-        const max = job.payUSD.max * rate;
-        const period = job.payUSD.period === "month" ? "/month" : "/year";
-        return `${formatMoney(min, currency)} – ${formatMoney(max, currency)} ${period}`;
-    }
 
     async function submitApplication(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -488,18 +588,15 @@ export default function JobsPage() {
                             </h1>
 
                             <p className="mt-3 text-[14px] leading-[1.9] text-neutral-700 max-w-[78ch]">
-                                We are building a premium translation-first communication platform. Browse open roles below. Tap any card to view
-                                qualifications and apply. CV upload is required for every application.
+                                We are building a premium translation-first communication platform. Browse open roles below. Tap any card to view qualifications and apply.
+                                CV upload is required for every application.
                             </p>
 
                             <div className="mt-5 flex flex-wrap gap-3">
                                 <Link href="/" className="water-btn inline-flex items-center justify-center px-4 py-3 text-sm font-semibold select-none">
                                     Back Home
                                 </Link>
-                                <Link
-                                    href="/blog"
-                                    className="water-btn water-btn-primary inline-flex items-center justify-center px-4 py-3 text-sm font-semibold select-none"
-                                >
+                                <Link href="/blog" className="water-btn water-btn-primary inline-flex items-center justify-center px-4 py-3 text-sm font-semibold select-none">
                                     Read Blog
                                 </Link>
                             </div>
@@ -515,6 +612,9 @@ export default function JobsPage() {
                     {JOBS.map((job) => {
                         const expanded = openId === job.id;
                         const remoteDisabled = !job.remoteAvailable;
+
+                        // card-level salary shows full-time by default (more standard)
+                        const defaultCardPay = payRangeLabel(job, "Full-time", currency);
 
                         return (
                             <button
@@ -545,13 +645,11 @@ export default function JobsPage() {
                                             {job.location} • {job.workMode}
                                         </div>
 
-                                        <div className="mt-3 text-[12.5px] font-medium leading-[1.75] text-neutral-700">
-                                            {job.summary}
-                                        </div>
+                                        <div className="mt-3 text-[12.5px] font-medium leading-[1.75] text-neutral-700">{job.summary}</div>
 
                                         <div className="mt-4 flex flex-wrap gap-2">
                                             <span className="rounded-full border border-black/10 bg-white px-3 py-1 text-[12px] font-semibold text-neutral-900">
-                                                Pay: {payLabel(job)}
+                                                Pay (Full-time): {defaultCardPay}
                                             </span>
 
                                             <span className="rounded-full border border-black/10 bg-white px-3 py-1 text-[12px] font-semibold text-neutral-900">
@@ -584,17 +682,14 @@ export default function JobsPage() {
                                 <div
                                     className={cx(
                                         "grid gap-4 overflow-hidden transition-[max-height,opacity] duration-200",
-                                        expanded ? "max-h-[1200px] opacity-100 mt-5" : "max-h-0 opacity-0 mt-0"
+                                        expanded ? "max-h-[1400px] opacity-100 mt-5" : "max-h-0 opacity-0 mt-0"
                                     )}
                                 >
                                     <div className="rounded-2xl border border-black/10 bg-white/90 p-4">
                                         <div className="text-[12px] font-extrabold text-neutral-950">Qualifications</div>
                                         <div className="mt-2 grid gap-2">
                                             {job.qualifications.map((q) => (
-                                                <div
-                                                    key={q}
-                                                    className="rounded-xl border border-black/10 bg-white px-3 py-2 text-[12.5px] font-semibold text-neutral-900"
-                                                >
+                                                <div key={q} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-[12.5px] font-semibold text-neutral-900">
                                                     {q}
                                                 </div>
                                             ))}
@@ -605,10 +700,7 @@ export default function JobsPage() {
                                         <div className="text-[12px] font-extrabold text-neutral-950">Responsibilities</div>
                                         <div className="mt-2 grid gap-2">
                                             {job.responsibilities.map((r) => (
-                                                <div
-                                                    key={r}
-                                                    className="rounded-xl border border-black/10 bg-white px-3 py-2 text-[12.5px] font-semibold text-neutral-900"
-                                                >
+                                                <div key={r} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-[12.5px] font-semibold text-neutral-900">
                                                     {r}
                                                 </div>
                                             ))}
@@ -625,6 +717,7 @@ export default function JobsPage() {
                                             onClick={(ev) => {
                                                 ev.stopPropagation();
                                                 setApplyJob(job);
+                                                setSelectedEmploymentType("Full-time");
                                                 setSubmitMsg(null);
                                             }}
                                             className={cx(
@@ -658,9 +751,7 @@ export default function JobsPage() {
                         <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
                                 <div className="text-[12px] font-bold text-neutral-700">Apply for</div>
-                                <div className="mt-1 text-[18px] font-extrabold tracking-[-0.02em] text-neutral-950">
-                                    {applyJob.title}
-                                </div>
+                                <div className="mt-1 text-[18px] font-extrabold tracking-[-0.02em] text-neutral-950">{applyJob.title}</div>
                                 <div className="mt-1 text-[12.5px] font-semibold text-neutral-700">
                                     {applyJob.dept} • {applyJob.location} • {applyJob.workMode}
                                 </div>
@@ -675,7 +766,47 @@ export default function JobsPage() {
                             </button>
                         </div>
 
-                        <form className="mt-5 grid gap-3" onSubmit={submitApplication}>
+                        {/* Salary chooser (Full-time vs Part-time; Remote disabled) */}
+                        <div className="mt-4 rounded-2xl border border-black/10 bg-white/85 p-4">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div className="text-[12px] font-extrabold text-neutral-950">Select employment type to view salary</div>
+
+                                <div className="flex flex-wrap gap-2">
+                                    {(["Full-time", "Part-time", "Remote"] as EmploymentType[]).map((t) => {
+                                        const disabled = t === "Remote" && !applyJob.remoteAvailable;
+                                        const active = selectedEmploymentType === t;
+
+                                        return (
+                                            <button
+                                                key={t}
+                                                type="button"
+                                                disabled={disabled}
+                                                onClick={() => setSelectedEmploymentType(t)}
+                                                className={cx(
+                                                    "rounded-full border border-black/10 px-4 py-2 text-[12px] font-extrabold",
+                                                    active ? "bg-white text-neutral-950" : "bg-white/70 text-neutral-700",
+                                                    disabled && "bg-neutral-200 text-neutral-500 cursor-not-allowed"
+                                                )}
+                                            >
+                                                {disabled ? "Remote (Unavailable)" : t}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className="mt-3 text-[12.5px] font-semibold text-neutral-800">
+                                Salary ({selectedEmploymentType}):{" "}
+                                <span className="font-extrabold">
+                                    {selectedEmploymentType === "Remote" && !applyJob.remoteAvailable
+                                        ? "Remote unavailable"
+                                        : payRangeLabel(applyJob, selectedEmploymentType, currency)}
+                                </span>
+                                <span className="ml-2 text-[12px] font-semibold text-neutral-600">(Estimated by IP-based currency)</span>
+                            </div>
+                        </div>
+
+                        <form className="mt-4 grid gap-3" onSubmit={submitApplication}>
                             <div className="grid gap-3 sm:grid-cols-2">
                                 <label className="grid gap-1">
                                     <span className="text-[12px] font-bold text-neutral-700">Full Name</span>
@@ -725,6 +856,8 @@ export default function JobsPage() {
                                     <select
                                         name="employmentType"
                                         required
+                                        value={selectedEmploymentType}
+                                        onChange={(e) => setSelectedEmploymentType(e.target.value as EmploymentType)}
                                         className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-neutral-900 outline-none"
                                     >
                                         {applyJob.employmentTypes.map((t) => (
@@ -781,15 +914,11 @@ export default function JobsPage() {
                             </label>
 
                             {submitMsg ? (
-                                <div className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-[12.5px] font-semibold text-neutral-800">
-                                    {submitMsg}
-                                </div>
+                                <div className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-[12.5px] font-semibold text-neutral-800">{submitMsg}</div>
                             ) : null}
 
                             <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
-                                <div className="text-[12px] font-semibold text-neutral-600">
-                                    Pay shown is estimated by IP-based currency selection.
-                                </div>
+                                <div className="text-[12px] font-semibold text-neutral-600">Pay shown is estimated by IP-based currency selection.</div>
 
                                 <button
                                     type="submit"
