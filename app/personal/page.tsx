@@ -71,36 +71,30 @@ function MiniVisual({
     title,
     subtitle,
     lines,
-    icon = "6",
 }: {
     title: string;
     subtitle: string;
     lines: string[];
-    icon?: string;
 }) {
     return (
-        <div
-            className={cx(
-                "rounded-3xl border border-black/10 bg-white/80 p-4",
-                "shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]"
-            )}
-        >
-            <div className="flex items-start justify-between gap-3">
+        <div className="rounded-3xl border border-black/10 bg-white/80 p-4 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
+            <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                    <div className="text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
+                    <div
+                        className="text-sm font-extrabold tracking-[-0.02em] whitespace-normal break-words"
+                        style={{ fontFamily: "var(--font-display)" }}
+                    >
                         {title}
                     </div>
 
-                    {/* ✅ FIX: Ensure subtitle wraps on mobile */}
                     <div className="mt-0.5 text-[12px] font-medium text-neutral-600 whitespace-normal break-words">
                         {subtitle}
                     </div>
                 </div>
 
-                <div className="shrink-0 rounded-2xl border border-black/10 bg-white px-3 py-1.5 shadow-[6px_6px_14px_rgba(0,0,0,0.10),_-6px_-6px_14px_rgba(255,255,255,0.95)]">
-                    <span className="text-xs font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-                        {icon}
-                    </span>
+                {/* ✅ LOGO (not “6”) */}
+                <div className="relative h-9 w-9 shrink-0 rounded-2xl border border-black/10 bg-white p-1 shadow-[6px_6px_14px_rgba(0,0,0,0.10),_-6px_-6px_14px_rgba(255,255,255,0.95)]">
+                    <Image src="/6logo.PNG" alt="6chatting" fill className="object-contain" sizes="36px" />
                 </div>
             </div>
 
@@ -122,6 +116,7 @@ function MiniVisual({
         </div>
     );
 }
+
 
 export default function PersonalPage() {
     const [waitlistOpen, setWaitlistOpen] = useState(false);
