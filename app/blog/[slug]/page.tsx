@@ -4,13 +4,31 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { BLOG_POSTS, BlogSection } from "../_data";
+
+type BlogSection =
+    | { type: "heading"; text: string }
+    | { type: "paragraph"; text: string }
+    | { type: "bullets"; items: string[] }
+    | { type: "note"; text: string };
+
+type BlogPost = {
+    slug: string;
+    category: string;
+    title: string;
+    subtitle: string;
+    cover_label: string | null;
+    read_mins: number;
+    content: BlogSection[];
+    bullets: string[];
+    published_at: string | null;
+    updated_at: string;
+    created_at: string;
+};
 
 function cx(...parts: Array<string | false | undefined | null>) {
     return parts.filter(Boolean).join(" ");
 }
 
-/** ✅ Always logo (never “6”) */
 function LogoBadge({ size = 36, className = "" }: { size?: number; className?: string }) {
     return (
         <div
@@ -54,10 +72,10 @@ function useNow(tickMs = 30_000) {
     return now;
 }
 
-function formatDateTime(iso: string, locale?: string) {
+function formatDateTime(iso: string) {
     const d = new Date(iso);
     try {
-        return new Intl.DateTimeFormat(locale || undefined, {
+        return new Intl.DateTimeFormat(undefined, {
             year: "numeric",
             month: "short",
             day: "2-digit",
@@ -89,16 +107,11 @@ function timeAgo(fromIso: string, nowMs: number) {
 function renderSection(s: BlogSection, idx: number) {
     if (s.type === "heading") {
         return (
-            <h2
-                key={idx}
-                className="text-[16px] sm:text-[17px] font-extrabold tracking-[-0.02em]"
-                style={{ fontFamily: "var(--font-display)" }}
-            >
+            <h2 key={idx} className="text-[16px] sm:text-[17px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
                 {s.text}
             </h2>
         );
     }
-
     if (s.type === "paragraph") {
         return (
             <p key={idx} className="text-[13.5px] sm:text-[14px] font-medium leading-[1.9] text-neutral-700 whitespace-normal break-words">
@@ -106,7 +119,6 @@ function renderSection(s: BlogSection, idx: number) {
             </p>
         );
     }
-
     if (s.type === "bullets") {
         return (
             <div key={idx} className="grid gap-2">
@@ -121,8 +133,6 @@ function renderSection(s: BlogSection, idx: number) {
             </div>
         );
     }
-
-    // note
     return (
         <div
             key={idx}
@@ -137,36 +147,60 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     const year = useMemo(() => new Date().getFullYear(), []);
     const now = useNow(30_000);
 
-    const post = useMemo(() => BLOG_POSTS.find((p) => p.slug === params.slug), [params.slug]);
+    const [post, setPost] = useState<BlogPost | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    if (!post) {
+    useEffect(() => {
+        let cancelled = false;
+        async function load() {
+            setLoading(true);
+            try {
+                const res = await fetch(`/api/blog/${params.slug}`, { cache: "no-store" });
+                const data = await res.json();
+                if (!cancelled) setPost(data.ok ? (data.post as BlogPost) : null);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        }
+        load();
+        return () => { cancelled = true; };
+    }, [params.slug]);
+
+    if (loading) {
         return (
-            <main className="mx-auto w-[min(960px,calc(100%-24px))] pb-14">
-                <section className="pt-6 sm:pt-10">
-                    <BevelCard className="p-6 sm:p-8">
-                        <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                                <Pill>6chatting Blog</Pill>
-                                <h1 className="mt-4 text-2xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-                                    Post not found
-                                </h1>
-                                <p className="mt-2 text-[14px] leading-[1.8] text-neutral-700">This article does not exist yet.</p>
-                                <div className="mt-5">
-                                    <Link className="water-btn water-btn-primary inline-flex px-4 py-3 text-sm font-semibold" href="/blog">
-                                        Back to Blog
-                                    </Link>
-                                </div>
-                            </div>
-                            <LogoBadge />
-                        </div>
-                    </BevelCard>
-                </section>
+            <main className="mx-auto w-[min(960px,calc(100%-24px))] pb-14 pt-6 sm:pt-10">
+                <BevelCard className="p-6 sm:p-8">
+                    <div className="text-[13.5px] font-semibold text-neutral-700">Loading article…</div>
+                </BevelCard>
             </main>
         );
     }
 
-    const whenIso = post.updatedAt || post.publishedAt;
-    const isUpdated = Boolean(post.updatedAt);
+    if (!post) {
+        return (
+            <main className="mx-auto w-[min(960px,calc(100%-24px))] pb-14 pt-6 sm:pt-10">
+                <BevelCard className="p-6 sm:p-8">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                            <Pill>6chatting Blog</Pill>
+                            <h1 className="mt-4 text-2xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+                                Post not found
+                            </h1>
+                            <p className="mt-2 text-[14px] leading-[1.8] text-neutral-700">This article may not be published yet.</p>
+                            <div className="mt-5">
+                                <Link className="water-btn water-btn-primary inline-flex px-4 py-3 text-sm font-semibold" href="/blog">
+                                    Back to Blog
+                                </Link>
+                            </div>
+                        </div>
+                        <LogoBadge />
+                    </div>
+                </BevelCard>
+            </main>
+        );
+    }
+
+    const whenIso = post.published_at || post.updated_at || post.created_at;
 
     return (
         <main className="mx-auto w-[min(960px,calc(100%-24px))] pb-14">
@@ -177,17 +211,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                             <div className="flex flex-wrap items-center gap-2">
                                 <Pill>6chatting Blog</Pill>
                                 <Pill>{post.category}</Pill>
-                                <Pill>{post.coverLabel || "Update"}</Pill>
-                                <Pill>
-                                    {isUpdated ? "Updated" : "Published"} {timeAgo(whenIso, now)} • {formatDateTime(whenIso)}
-                                </Pill>
-                                <Pill>{post.readMins} min read</Pill>
+                                <Pill>{post.cover_label || "Update"}</Pill>
+                                <Pill>Published {timeAgo(whenIso, now)} • {formatDateTime(whenIso)}</Pill>
+                                <Pill>{post.read_mins} min read</Pill>
                             </div>
 
-                            <h1
-                                className="mt-4 text-[clamp(24px,4.6vw,40px)] font-extrabold leading-[1.1] tracking-[-0.04em]"
-                                style={{ fontFamily: "var(--font-display)" }}
-                            >
+                            <h1 className="mt-4 text-[clamp(24px,4.6vw,40px)] font-extrabold leading-[1.1] tracking-[-0.04em]" style={{ fontFamily: "var(--font-display)" }}>
                                 {post.title}
                             </h1>
 
@@ -196,12 +225,8 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                             </p>
 
                             <div className="mt-5 flex flex-wrap gap-3">
-                                <Link className="water-btn inline-flex px-4 py-3 text-sm font-semibold" href="/blog">
-                                    Back to Blog
-                                </Link>
-                                <Link className="water-btn water-btn-primary inline-flex px-4 py-3 text-sm font-semibold" href="/pricing">
-                                    View pricing
-                                </Link>
+                                <Link className="water-btn inline-flex px-4 py-3 text-sm font-semibold" href="/blog">Back to Blog</Link>
+                                <Link className="water-btn water-btn-primary inline-flex px-4 py-3 text-sm font-semibold" href="/pricing">View pricing</Link>
                             </div>
                         </div>
 
@@ -209,27 +234,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                     </div>
 
                     <div className="mt-7 grid gap-4">
-                        {post.content.map((s, idx) => renderSection(s, idx))}
-                    </div>
-
-                    <div className="mt-8 rounded-3xl border border-black/10 bg-white/85 p-5 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                        <div className="text-[13.5px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-                            Next steps
-                        </div>
-                        <div className="mt-2 grid gap-2">
-                            {[
-                                "We can connect this blog to a database/CMS next (Supabase, Sanity, Strapi, Contentful, etc.).",
-                                "We can add an admin page to create/edit posts and auto-update the ‘updatedAt’ timestamp.",
-                                "We can add tags, author profiles, and a ‘featured’ section.",
-                            ].map((t) => (
-                                <div
-                                    key={t}
-                                    className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
-                                >
-                                    {t}
-                                </div>
-                            ))}
-                        </div>
+                        {(post.content || []).map((s, idx) => renderSection(s, idx))}
                     </div>
                 </BevelCard>
             </section>
@@ -237,15 +242,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             <footer className="pt-10 text-neutral-700">
                 <div className="border-t border-black/10 pt-6">
                     <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[12px] font-semibold">
-                        <Link href="/policies/terms" target="_blank" rel="noopener noreferrer">
-                            Terms of Service
-                        </Link>
-                        <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer">
-                            Privacy Policy
-                        </Link>
-                        <Link href="/policies/contact" target="_blank" rel="noopener noreferrer">
-                            Contact
-                        </Link>
+                        <Link href="/policies/terms" target="_blank" rel="noopener noreferrer">Terms of Service</Link>
+                        <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
+                        <Link href="/policies/contact" target="_blank" rel="noopener noreferrer">Contact</Link>
                     </div>
 
                     <div className="mt-5 text-center text-xs font-normal text-neutral-600">

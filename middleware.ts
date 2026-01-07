@@ -45,8 +45,28 @@ function getCountry(req: NextRequest): string | null {
 }
 
 export function middleware(req: NextRequest) {
+    const { pathname } = req.nextUrl;
+
+    // =========================
+    // ADMIN-ONLY BLOG FLOW
+    // =========================
+    // Protect /admin/blog/* except /admin/blog/login
+    if (pathname.startsWith("/admin/blog") && !pathname.startsWith("/admin/blog/login")) {
+        const ok = req.cookies.get("blog_admin")?.value === "1";
+        if (!ok) {
+            const url = req.nextUrl.clone();
+            url.pathname = "/admin/blog/login";
+            url.searchParams.set("next", pathname);
+            return NextResponse.redirect(url);
+        }
+    }
+
+    // Continue request
     const res = NextResponse.next();
 
+    // =========================
+    // CURRENCY (IP/COUNTRY COOKIE)
+    // =========================
     // If user already chose a currency, respect it.
     const existing = req.cookies.get("currency")?.value;
     if (existing) return res;
@@ -58,7 +78,7 @@ export function middleware(req: NextRequest) {
         path: "/",
         httpOnly: false,
         sameSite: "lax",
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 24 * 60, // 60 days
     });
 
