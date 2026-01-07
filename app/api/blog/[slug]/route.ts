@@ -1,23 +1,28 @@
-// app/api/blog/route.ts
+// app/api/blog/[slug]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { supabasePublic } from "@/lib/supabase-public";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-export const dynamic = "force-dynamic";
+export async function GET(
+    _req: NextRequest,
+    { params }: { params: { slug: string } }
+) {
+    const slug = params.slug;
 
-export async function GET(_req: NextRequest) {
-    const sb = supabasePublic();
+    const supabase = supabaseAdmin();
 
-    const { data, error } = await sb
+    const { data, error } = await supabase
         .from("blog_posts")
-        .select(
-            "id, slug, category, title, subtitle, cover_label, read_mins, bullets, status, published_at, created_at, updated_at"
-        )
+        .select("*")
+        .eq("slug", slug)
         .eq("status", "published")
-        .order("published_at", { ascending: false, nullsFirst: false });
+        .single();
 
-    if (error) {
-        return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    if (error || !data) {
+        return NextResponse.json(
+            { ok: false, error: "Post not found" },
+            { status: 404 }
+        );
     }
 
-    return NextResponse.json({ ok: true, posts: data ?? [] }, { status: 200 });
+    return NextResponse.json({ ok: true, post: data });
 }
