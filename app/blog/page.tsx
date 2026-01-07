@@ -1,23 +1,9 @@
-// app/blog/page.tsx
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-
-type BlogPost = {
-    id: string;
-    slug: string;
-    category: string;
-    title: string;
-    subtitle: string;
-    cover_label: string | null;
-    read_mins: number;
-    bullets: string[];
-    published_at: string | null;
-    updated_at: string;
-    created_at: string;
-};
+import { useMemo, useState } from "react";
+import { POSTS, CATEGORY_FILTERS, BlogPost } from "./data";
 
 function cx(...parts: Array<string | false | undefined | null>) {
     return parts.filter(Boolean).join(" ");
@@ -60,11 +46,13 @@ const Pill = ({ children, className = "" }: { children: React.ReactNode; classNa
 const Button = ({
     children,
     href,
+    onClick,
     variant = "default",
     className = "",
 }: {
     children: React.ReactNode;
     href?: string;
+    onClick?: () => void;
     variant?: "default" | "primary";
     className?: string;
 }) => {
@@ -74,7 +62,11 @@ const Button = ({
     const cls = cx(base, variant === "primary" && primary, className);
 
     if (href) return <Link className={cls} href={href}>{children}</Link>;
-    return <button className={cls} type="button">{children}</button>;
+    return (
+        <button className={cls} type="button" onClick={onClick}>
+            {children}
+        </button>
+    );
 };
 
 function IconArrow() {
@@ -86,69 +78,43 @@ function IconArrow() {
     );
 }
 
-function useNow(tickMs = 30_000) {
-    const [now, setNow] = useState(() => Date.now());
-    useEffect(() => {
-        const id = setInterval(() => setNow(Date.now()), tickMs);
-        return () => clearInterval(id);
-    }, [tickMs]);
-    return now;
-}
-
-function formatDate(iso: string) {
-    const d = new Date(iso);
-    try {
-        return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" }).format(d);
-    } catch {
-        return d.toDateString();
-    }
-}
-
-function timeAgo(fromIso: string, nowMs: number) {
-    const from = new Date(fromIso).getTime();
-    const diff = Math.max(0, nowMs - from);
-    const sec = Math.floor(diff / 1000);
-    const min = Math.floor(sec / 60);
-    const hr = Math.floor(min / 60);
-    const day = Math.floor(hr / 24);
-    const week = Math.floor(day / 7);
-
-    if (sec < 15) return "just now";
-    if (sec < 60) return `${sec}s ago`;
-    if (min < 60) return `${min}m ago`;
-    if (hr < 24) return `${hr}h ago`;
-    if (day < 7) return `${day}d ago`;
-    return `${week}w ago`;
+function IconSpark() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+                d="M12 2l1.2 6.1L19 10l-5.8 1.9L12 18l-1.2-6.1L5 10l5.8-1.9L12 2Z"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinejoin="round"
+            />
+            <path
+                d="M5 14l.8 3.9L9 19l-3.2 1.1L5 24l-.8-3.9L1 19l3.2-1.1L5 14Z"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinejoin="round"
+                opacity=".5"
+            />
+        </svg>
+    );
 }
 
 export default function BlogPage() {
     const year = useMemo(() => new Date().getFullYear(), []);
-    const now = useNow(30_000);
-
     const [query, setQuery] = useState("");
-    const [posts, setPosts] = useState<BlogPost[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    async function load() {
-        setLoading(true);
-        try {
-            const res = await fetch("/api/blog", { cache: "no-store" });
-            const data = await res.json();
-            setPosts((data.posts || []) as BlogPost[]);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    useEffect(() => {
-        load();
-    }, []);
+    const [filter, setFilter] = useState<(typeof CATEGORY_FILTERS)[number]>("All");
 
     const visible = useMemo(() => {
         const q = query.trim().toLowerCase();
-        if (!q) return posts;
-        return posts.filter((p) => (p.title + " " + p.subtitle + " " + (p.bullets || []).join(" ")).toLowerCase().includes(q));
-    }, [posts, query]);
+        return POSTS.filter((p) => {
+            const matchesFilter = filter === "All" ? true : p.category === filter;
+            const matchesQuery =
+                !q ||
+                p.title.toLowerCase().includes(q) ||
+                p.subtitle.toLowerCase().includes(q) ||
+                p.bullets.join(" ").toLowerCase().includes(q);
+            return matchesFilter && matchesQuery;
+        });
+    }, [query, filter]);
 
     return (
         <main className="mx-auto w-[min(1120px,calc(100%-24px))] pb-14">
@@ -157,44 +123,105 @@ export default function BlogPage() {
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                                <Pill>6chatting Blog</Pill>
-                                <Pill>Server-driven posts</Pill>
-                                <Pill>Live “how old” timestamps</Pill>
+                                <Pill>
+                                    <span className="mr-2 text-black">
+                                        <IconSpark />
+                                    </span>
+                                    6chatting Blog
+                                </Pill>
+                                <Pill>Launch date: 06/06/2026</Pill>
+                                <Pill>Updates • Features • Verification</Pill>
                             </div>
 
-                            <h1 className="mt-4 text-[clamp(26px,4.8vw,44px)] font-extrabold leading-[1.08] tracking-[-0.04em] text-black" style={{ fontFamily: "var(--font-display)" }}>
-                                Updates, features, and what users should expect next.
+                            <h1
+                                className="mt-4 text-[clamp(26px,4.8vw,44px)] font-extrabold leading-[1.08] tracking-[-0.04em] text-black"
+                                style={{ fontFamily: "var(--font-display)" }}
+                            >
+                                We’re launching 6chatting on 06/06/2026.
+                                <br className="hidden sm:block" />
+                                Here’s everything users should expect.
                             </h1>
 
-                            <p className="mt-3 max-w-2xl text-[14.5px] sm:text-[15px] font-medium leading-[1.8] text-neutral-700">
-                                New posts appear here immediately after you publish from the admin page.
+                            <p className="mt-3 max-w-2xl text-[14.5px] sm:text-[15px] font-medium leading-[1.8] text-neutral-700 whitespace-normal break-words">
+                                This blog keeps your community informed: feature rollouts, verification tiers (Real/Gold/White),
+                                safety improvements, translation quality updates, and call reliability upgrades.
                             </p>
 
                             <div className="mt-5 flex flex-wrap gap-2">
-                                <Button href="/admin/blog" variant="primary">
-                                    Admin: publish updates <IconArrow />
+                                <Button href="#posts" variant="primary">
+                                    Read the updates <IconArrow />
                                 </Button>
                                 <Button href="/pricing">View pricing</Button>
+                                <Button href="/help">Help Center</Button>
                             </div>
                         </div>
 
-                        <div className="rounded-3xl border border-black/10 bg-white/85 p-5 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)] lg:w-[360px]">
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                    <div className="text-[13px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-                                        Search posts
-                                    </div>
-                                    <div className="mt-2 rounded-2xl border border-black/10 bg-white/90 px-3 py-2 shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]">
-                                        <input
-                                            value={query}
-                                            onChange={(e) => setQuery(e.target.value)}
-                                            placeholder="Search…"
-                                            className="w-full bg-transparent text-[13px] font-semibold outline-none"
-                                        />
-                                    </div>
+                        <div className="flex items-center justify-between gap-3 rounded-3xl border border-black/10 bg-white/85 p-5 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)] lg:w-[360px]">
+                            <div className="min-w-0">
+                                <div className="text-[13px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+                                    What to expect next
                                 </div>
-                                <LogoBadge size={44} />
+                                <div className="mt-2 grid gap-2">
+                                    {[
+                                        "Launch week onboarding + waitlist rollout",
+                                        "Translation quality and allocation details",
+                                        "Verification requirements and timelines",
+                                        "Business trust + brand protection upgrades",
+                                    ].map((t) => (
+                                        <div
+                                            key={t}
+                                            className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
+                                        >
+                                            {t}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
+
+                            <LogoBadge size={44} />
+                        </div>
+                    </div>
+                </BevelCard>
+            </section>
+
+            <section className="pt-6" id="posts">
+                <BevelCard className="p-4 sm:p-5">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                            <div className="text-[13px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+                                Latest posts
+                            </div>
+                            <div className="mt-1 text-[12.5px] font-medium text-neutral-600">
+                                {visible.length} post{visible.length === 1 ? "" : "s"} shown
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                            <div className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]">
+                                <input
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    placeholder="Search posts…"
+                                    className="w-full bg-transparent text-[13px] font-semibold outline-none"
+                                    aria-label="Search posts"
+                                />
+                            </div>
+
+                            <label className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[13px] font-semibold shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]">
+                                <span className="text-neutral-600">Category:</span>{" "}
+                                <select
+                                    value={filter}
+                                    onChange={(e) => setFilter(e.target.value as any)}
+                                    className="ml-2 bg-transparent font-extrabold outline-none"
+                                    aria-label="Filter category"
+                                >
+                                    {CATEGORY_FILTERS.map((c) => (
+                                        <option key={c} value={c}>
+                                            {c}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
                         </div>
                     </div>
                 </BevelCard>
@@ -202,72 +229,50 @@ export default function BlogPage() {
 
             <section className="pt-4">
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    {loading ? (
-                        <BevelCard className="p-6">
-                            <div className="text-[13.5px] font-semibold text-neutral-700">Loading posts…</div>
-                        </BevelCard>
-                    ) : null}
-
-                    {!loading && visible.length === 0 ? (
-                        <BevelCard className="p-6">
-                            <div className="text-[13.5px] font-semibold text-neutral-700">No posts found.</div>
-                        </BevelCard>
-                    ) : null}
-
-                    {visible.map((p) => {
-                        const whenIso = p.published_at || p.updated_at || p.created_at;
-                        const rel = timeAgo(whenIso, now);
-                        const abs = formatDate(whenIso);
-
-                        return (
-                            <BevelCard key={p.id} className="p-5 sm:p-6">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="min-w-0">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
-                                                {p.category}
-                                            </span>
-                                            <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-700">
-                                                {p.cover_label || "Update"}
-                                            </span>
-                                            <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-700">
-                                                {p.read_mins} min read
-                                            </span>
-                                            <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-700">
-                                                Published {rel} • {abs}
-                                            </span>
-                                        </div>
-
-                                        <h2 className="mt-3 text-[18px] font-extrabold leading-[1.25] tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
-                                            {p.title}
-                                        </h2>
-
-                                        <p className="mt-2 text-[13px] font-medium leading-[1.75] text-neutral-700 whitespace-normal break-words">
-                                            {p.subtitle}
-                                        </p>
+                    {visible.map((p: BlogPost) => (
+                        <BevelCard key={p.slug} className="p-5 sm:p-6">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
+                                            {p.category}
+                                        </span>
+                                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-700">
+                                            {p.dateLabel}
+                                        </span>
+                                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-700">
+                                            {p.readMins} min read
+                                        </span>
                                     </div>
-                                    <LogoBadge size={34} />
-                                </div>
 
-                                <div className="mt-4 grid gap-2">
-                                    {(p.bullets || []).slice(0, 6).map((b) => (
-                                        <div
-                                            key={b}
-                                            className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
-                                        >
-                                            {b}
-                                        </div>
-                                    ))}
+                                    <h2 className="mt-3 text-[18px] font-extrabold leading-[1.25] tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
+                                        {p.title}
+                                    </h2>
+                                    <p className="mt-2 text-[13px] font-medium leading-[1.75] text-neutral-700 whitespace-normal break-words">
+                                        {p.subtitle}
+                                    </p>
                                 </div>
+                                <LogoBadge size={34} />
+                            </div>
 
-                                <div className="mt-5">
-                                    <Button href={`/blog/${p.slug}`} variant="primary" className="w-full">
-                                        Read more <IconArrow />
-                                    </Button>
-                                </div>
-                            </BevelCard>
-                        );
-                    })}
+                            <div className="mt-4 grid gap-2">
+                                {p.bullets.map((b) => (
+                                    <div
+                                        key={b}
+                                        className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 whitespace-normal break-words shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
+                                    >
+                                        {b}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="mt-5 grid gap-2">
+                                <Button href={`/blog/${p.slug}`} variant="primary" className="w-full">
+                                    Read post <IconArrow />
+                                </Button>
+                            </div>
+                        </BevelCard>
+                    ))}
                 </div>
             </section>
 
@@ -276,6 +281,7 @@ export default function BlogPage() {
                     <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[12px] font-semibold">
                         <Link href="/policies/terms" target="_blank" rel="noopener noreferrer">Terms of Service</Link>
                         <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
+                        <Link href="/policies/acceptable-use" target="_blank" rel="noopener noreferrer">Acceptable Use</Link>
                         <Link href="/policies/contact" target="_blank" rel="noopener noreferrer">Contact</Link>
                     </div>
 
@@ -287,9 +293,7 @@ export default function BlogPage() {
 
             <style jsx global>{`
         @media (prefers-reduced-motion: no-preference) {
-          .water-bevel {
-            transform: translateZ(0);
-          }
+          .water-bevel { transform: translateZ(0); }
         }
       `}</style>
         </main>
