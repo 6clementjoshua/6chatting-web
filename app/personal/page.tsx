@@ -13,18 +13,22 @@ const BevelCard = ({ children, className = "" }: { children: React.ReactNode; cl
     <div className={cx("water-bevel", className)}>{children}</div>
 );
 
+/**
+ * ✅ FIX: Removed truncate so mobile text NEVER cuts off.
+ * Forces wrap + breaks long words.
+ */
 const Pill = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
     <span
         className={cx(
-            "inline-flex items-center justify-center rounded-full",
+            "inline-flex max-w-full items-center justify-center rounded-full",
             "border border-black/10 bg-white/95 px-3 py-2",
-            "text-xs font-semibold text-black/90",
+            "text-xs font-semibold text-black/90 text-center leading-snug",
+            "whitespace-normal break-words",
             "shadow-[6px_6px_14px_rgba(0,0,0,0.10),_-6px_-6px_14px_rgba(255,255,255,0.95)]",
-            "max-w-full",
             className
         )}
     >
-        <span className="truncate">{children}</span>
+        {children}
     </span>
 );
 
@@ -67,23 +71,36 @@ function MiniVisual({
     title,
     subtitle,
     lines,
+    icon = "6",
 }: {
     title: string;
     subtitle: string;
     lines: string[];
+    icon?: string;
 }) {
     return (
-        <div className="rounded-3xl border border-black/10 bg-white/80 p-4 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-            <div className="flex items-center justify-between gap-3">
+        <div
+            className={cx(
+                "rounded-3xl border border-black/10 bg-white/80 p-4",
+                "shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]"
+            )}
+        >
+            <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                     <div className="text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
                         {title}
                     </div>
-                    <div className="mt-0.5 text-[12px] font-medium text-neutral-600">{subtitle}</div>
+
+                    {/* ✅ FIX: Ensure subtitle wraps on mobile */}
+                    <div className="mt-0.5 text-[12px] font-medium text-neutral-600 whitespace-normal break-words">
+                        {subtitle}
+                    </div>
                 </div>
 
-                <div className="relative h-9 w-9 shrink-0 rounded-2xl border border-black/10 bg-white p-1 shadow-[6px_6px_14px_rgba(0,0,0,0.10),_-6px_-6px_14px_rgba(255,255,255,0.95)]">
-                    <Image src="/6logo.PNG" alt="6chatting" fill className="object-contain" sizes="36px" />
+                <div className="shrink-0 rounded-2xl border border-black/10 bg-white px-3 py-1.5 shadow-[6px_6px_14px_rgba(0,0,0,0.10),_-6px_-6px_14px_rgba(255,255,255,0.95)]">
+                    <span className="text-xs font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+                        {icon}
+                    </span>
                 </div>
             </div>
 
@@ -94,6 +111,7 @@ function MiniVisual({
                         className={cx(
                             "rounded-2xl border border-black/10 bg-white/90 px-3 py-2",
                             "text-[12.5px] font-semibold text-neutral-900",
+                            "whitespace-normal break-words",
                             "shadow-[8px_8px_18px_rgba(0,0,0,0.07),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
                         )}
                     >
@@ -114,6 +132,7 @@ export default function PersonalPage() {
             {/* HERO */}
             <section className="grid gap-4 pt-6 sm:pt-10 md:grid-cols-[1.05fr_.95fr]">
                 <BevelCard className="p-5 sm:p-7">
+                    {/* ✅ FIX: No truncate so it wraps fully on mobile */}
                     <Pill>6chatting Personal • Private conversations with real-time translation</Pill>
 
                     <h1
@@ -126,14 +145,14 @@ export default function PersonalPage() {
                     </h1>
 
                     <p className="mt-3 max-w-xl text-[15px] sm:text-[15.5px] font-normal leading-[1.75] text-neutral-700">
-                        The 6chatting Personal experience is built for everyday conversations: friends, family, communities, and global
-                        connections—without language barriers. Your language is respected everywhere: text, voice, and calling flows.
+                        6chatting Personal is built for the people closest to you—family, friends, and trusted circles. It keeps the
+                        experience clean and premium while removing language barriers across text, voice notes, and calling.
                     </p>
 
                     <div className="mt-6 grid gap-2">
-                        {/* This will remain waitlist for now, and later becomes your personal build download */}
+                        {/* ✅ FIX: Removed “(Waitlist)” from the label */}
                         <Button variant="primary" onClick={() => setWaitlistOpen(true)} className="w-full max-w-[680px]">
-                            Download 6chatting Personal (Waitlist)
+                            Download 6chatting Personal
                         </Button>
 
                         <div className="grid gap-2 sm:grid-cols-2">
@@ -154,34 +173,63 @@ export default function PersonalPage() {
                         <Pill>Media sharing</Pill>
                         <Pill>Privacy-first controls</Pill>
                     </div>
+
+                    {/* Added: premium micro section (more “visual” without clutter) */}
+                    <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                        <div className="water-inset rounded-3xl p-4">
+                            <div className="text-[12px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+                                Personal spaces
+                            </div>
+                            <div className="mt-1 text-[12.5px] font-medium text-neutral-700 whitespace-normal break-words">
+                                1:1 chats and small groups that feel calm, private, and premium.
+                            </div>
+                        </div>
+                        <div className="water-inset rounded-3xl p-4">
+                            <div className="text-[12px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+                                Smart sharing
+                            </div>
+                            <div className="mt-1 text-[12.5px] font-medium text-neutral-700 whitespace-normal break-words">
+                                Photos, videos, documents—clean previews and fast sending.
+                            </div>
+                        </div>
+                        <div className="water-inset rounded-3xl p-4">
+                            <div className="text-[12px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+                                Comfort by default
+                            </div>
+                            <div className="mt-1 text-[12.5px] font-medium text-neutral-700 whitespace-normal break-words">
+                                Designed for readability, speed, and everyday connection.
+                            </div>
+                        </div>
+                    </div>
                 </BevelCard>
 
                 {/* VISUALS */}
                 <div className="grid gap-4">
                     <BevelCard className="p-5 sm:p-6">
-                        <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
                                 <div className="text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
                                     What you will see inside Personal
                                 </div>
-                                <div className="mt-1 text-[12.5px] font-medium text-neutral-600">
-                                    Visual previews (UI concept blocks) to match your premium landing style.
+
+                                {/* ✅ FIX: Removed “Visual previews (UI concept blocks…)” hint text */}
+                                <div className="mt-1 text-[12.5px] font-medium text-neutral-600 whitespace-normal break-words">
+                                    Everything you need for daily conversations—simple, fast, and private.
                                 </div>
                             </div>
-                            <span className="rounded-full border border-black/10 bg-white/90 px-3 py-1 text-[12px] font-bold">
-                                Premium UI
-                            </span>
+
+                            {/* ✅ FIX: Removed “Premium UI” badge */}
                         </div>
 
                         <div className="mt-4 grid gap-3 sm:grid-cols-2">
                             <MiniVisual
                                 title="Chats"
-                                subtitle="Clean threads + rich previews"
-                                lines={["Pinned chats", "Unread indicators", "Smart search", "Media preview"]}
+                                subtitle="Clean threads with rich previews."
+                                lines={["Pinned chats", "Unread indicators", "Smart search", "Media previews"]}
                             />
                             <MiniVisual
                                 title="Live Translation"
-                                subtitle="You type once. They receive in their language."
+                                subtitle="Type once. They receive it in their language."
                                 lines={["Auto-detect", "Manual toggle", "Inline translate", "Phrase suggestions"]}
                             />
                             <MiniVisual
@@ -191,8 +239,19 @@ export default function PersonalPage() {
                             />
                             <MiniVisual
                                 title="Calls"
-                                subtitle="Translation during calls"
+                                subtitle="Translation support during calls."
                                 lines={["Call captions", "Language pairing", "Low-latency mode", "Call summary"]}
+                            />
+                            {/* Added more visuals (premium but not “hints”) */}
+                            <MiniVisual
+                                title="Reactions"
+                                subtitle="Express fast without typing."
+                                lines={["Emoji reactions", "Sticker packs", "Quick reply tray", "Favorites"]}
+                            />
+                            <MiniVisual
+                                title="Privacy"
+                                subtitle="Control what you share."
+                                lines={["Read receipts", "Last-seen controls", "Block/report", "Safe contacts"]}
                             />
                         </div>
                     </BevelCard>
@@ -201,7 +260,8 @@ export default function PersonalPage() {
                         <div className="text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
                             Personal is designed for comfort
                         </div>
-                        <p className="mt-2 text-[13.5px] leading-[1.75] text-neutral-700">
+
+                        <p className="mt-2 text-[13.5px] leading-[1.75] text-neutral-700 whitespace-normal break-words">
                             Personal prioritizes readability, speed, and privacy. The interface stays minimal and premium: water-bevel
                             cards, soft depth, and clear hierarchy—so messages remain the focus.
                         </p>
@@ -210,7 +270,7 @@ export default function PersonalPage() {
                             {[
                                 { k: "Privacy controls", v: "Last-seen, read receipts, block/report, and safe contact tools." },
                                 { k: "Media sharing", v: "Photos, videos, documents—organized previews with fast sending." },
-                                { k: "Emoji & stickers", v: "Expressive packs with quick reactions and frequently used tray." },
+                                { k: "Emoji & stickers", v: "Expressive packs with quick reactions and a frequently used tray." },
                                 { k: "Reliable delivery", v: "Optimized for low-bandwidth conditions and stable messaging." },
                             ].map((row) => (
                                 <div
@@ -220,7 +280,9 @@ export default function PersonalPage() {
                                     <div className="text-[13.5px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
                                         {row.k}
                                     </div>
-                                    <div className="mt-1 text-[13px] font-medium leading-[1.7] text-neutral-700">{row.v}</div>
+                                    <div className="mt-1 text-[13px] font-medium leading-[1.7] text-neutral-700 whitespace-normal break-words">
+                                        {row.v}
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -237,7 +299,7 @@ export default function PersonalPage() {
                             body: "Fast threads, rich previews, emoji reactions, stickers, and a premium feel that stays out of your way.",
                         },
                         {
-                            title: "Translation that feels native",
+                            title: "Translation that feels natural",
                             body: "Inline translation, language pairing, and smooth switching between original and translated message views.",
                         },
                         {
@@ -249,7 +311,9 @@ export default function PersonalPage() {
                             <div className="text-[14px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
                                 {f.title}
                             </div>
-                            <p className="mt-2 text-[13.5px] leading-[1.75] text-neutral-700">{f.body}</p>
+                            <p className="mt-2 text-[13.5px] leading-[1.75] text-neutral-700 whitespace-normal break-words">
+                                {f.body}
+                            </p>
                         </BevelCard>
                     ))}
                 </div>
@@ -260,22 +324,26 @@ export default function PersonalPage() {
                 <BevelCard className="p-6 sm:p-8">
                     <div className="grid gap-4 md:grid-cols-[1.1fr_.9fr] md:items-center">
                         <div>
-                            <Pill>Personal • Waitlist download for now</Pill>
+                            {/* ✅ FIX: Removed “Waitlist download for now” */}
+                            <Pill>Personal • Early access</Pill>
+
                             <h2
                                 className="mt-3 text-[clamp(20px,3.4vw,34px)] font-extrabold leading-[1.1] tracking-[-0.03em]"
                                 style={{ fontFamily: "var(--font-display)" }}
                             >
                                 Get early access to 6chatting Personal.
                             </h2>
-                            <p className="mt-2 text-[14px] leading-[1.8] text-neutral-700">
-                                This button currently opens the waitlist flow. Once the Personal build is live, we replace it with the real
-                                download link—without changing the page design.
+
+                            <p className="mt-2 text-[14px] leading-[1.8] text-neutral-700 whitespace-normal break-words">
+                                Start with Personal for family and friends—fast messaging, translation built-in, and a premium interface
+                                designed for everyday connection.
                             </p>
                         </div>
 
                         <div className="grid gap-2">
+                            {/* ✅ FIX: Removed “(Waitlist)” */}
                             <Button variant="primary" onClick={() => setWaitlistOpen(true)} className="w-full">
-                                Download Personal (Waitlist)
+                                Download Personal
                             </Button>
                             <Button href="/compatibility" className="w-full">
                                 Compatibility first
