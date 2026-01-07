@@ -18,7 +18,7 @@ const spaceGrotesk = Space_Grotesk({
 
 // Update these once and everything stays consistent
 const SITE_NAME = "6chatting";
-const DOMAIN = "6chatting.com";
+const DOMAIN = "www.6chatting.com";
 const SITE_URL = `https://${DOMAIN}`;
 
 // ✅ Use relative OG image path so metadataBase builds the absolute URL correctly
