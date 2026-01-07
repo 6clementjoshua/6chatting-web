@@ -7,12 +7,13 @@ import { useEffect, useMemo, useState } from "react";
 import WaitlistModal from "../components/WaitlistModal";
 
 type Billing = "weekly" | "monthly" | "yearly";
+
 type PricingApi = {
     ok: boolean;
     billing: Billing;
     billingLabel: string;
-    country: string;
-    currency: string;
+    country: string; // e.g. "NG"
+    currency: string; // e.g. "USD"
     fxRate: number;
     prices: Record<
         string,
@@ -20,19 +21,6 @@ type PricingApi = {
     >;
     note?: string;
 };
-
-function formatByCurrency(amount: number, currency: string) {
-    try {
-        return new Intl.NumberFormat(undefined, {
-            style: "currency",
-            currency,
-            maximumFractionDigits: currency === "NGN" || currency === "XOF" || currency === "XAF" ? 0 : 2,
-        }).format(amount);
-    } catch {
-        return `${currency} ${amount}`;
-    }
-}
-
 
 function cx(...parts: Array<string | false | undefined | null>) {
     return parts.filter(Boolean).join(" ");
@@ -214,11 +202,7 @@ function IconBolt({ className = "" }: { className?: string }) {
 function IconGlobe({ className = "" }: { className?: string }) {
     return (
         <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-                d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"
-                stroke="currentColor"
-                strokeWidth="1.8"
-            />
+            <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" stroke="currentColor" strokeWidth="1.8" />
             <path d="M2 12h20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
             <path
                 d="M12 2c3 2.8 5 6.8 5 10s-2 7.2-5 10c-3-2.8-5-6.8-5-10S9 4.8 12 2Z"
@@ -249,48 +233,9 @@ const CURRENCY_LABELS: Record<Currency, string> = {
     XAF: "CFA Franc (Central) (FCFA)",
 };
 
-/**
- * IMPORTANT:
- * - This is a safe, offline approximation table (no API calls).
- * - Base currency is NGN.
- * - Replace these with live FX rates later (server-side) for exact conversions.
- */
-const FX_FROM_NGN: Record<Currency, number> = {
-    NGN: 1,
-    USD: 1 / 1600,
-    GBP: 1 / 2000,
-    EUR: 1 / 1750,
-    CAD: 1 / 1200,
-    AUD: 1 / 1050,
-    ZAR: 1 / 85,
-    KES: 1 / 12,
-    GHS: 1 / 130,
-    XOF: 1 / 2.7,
-    XAF: 1 / 2.7,
-};
-
-function detectCurrencyFromLocale(localeLike: string | undefined): Currency {
-    const loc = (localeLike || "").toUpperCase();
-
-    // Region hint (best-effort, no IP lookup on client).
-    if (loc.includes("-NG")) return "NGN";
-    if (loc.includes("-US")) return "USD";
-    if (loc.includes("-GB")) return "GBP";
-    if (loc.includes("-CA")) return "CAD";
-    if (loc.includes("-AU")) return "AUD";
-    if (loc.includes("-ZA")) return "ZAR";
-    if (loc.includes("-KE")) return "KES";
-    if (loc.includes("-GH")) return "GHS";
-    if (loc.includes("-FR") || loc.includes("-DE") || loc.includes("-ES") || loc.includes("-IT") || loc.includes("-NL"))
-        return "EUR";
-
-    // Francophone West/Central Africa common defaults (optional)
-    if (loc.includes("-SN") || loc.includes("-CI") || loc.includes("-BJ") || loc.includes("-BF") || loc.includes("-ML"))
-        return "XOF";
-    if (loc.includes("-CM") || loc.includes("-GA") || loc.includes("-TD") || loc.includes("-CG") || loc.includes("-CF"))
-        return "XAF";
-
-    // If unknown, use USD as global-friendly default
+function normalizeCurrency(c: string | undefined): Currency {
+    const up = (c || "").toUpperCase();
+    if ((Object.keys(CURRENCY_LABELS) as string[]).includes(up)) return up as Currency;
     return "USD";
 }
 
@@ -304,11 +249,37 @@ function formatMoney(amount: number, currency: Currency, locale: string, opts?: 
         });
         return (isApprox ? "~" : "") + nf.format(amount);
     } catch {
-        // Fallback (very rare)
-        const rounded = currency === "NGN" || currency === "XOF" || currency === "XAF" ? Math.round(amount) : Math.round(amount * 100) / 100;
+        const rounded =
+            currency === "NGN" || currency === "XOF" || currency === "XAF"
+                ? Math.round(amount)
+                : Math.round(amount * 100) / 100;
         return (isApprox ? "~" : "") + `${currency} ${String(rounded).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
     }
 }
+
+// =========================
+// FALLBACK PRICES (BASE NGN)
+// =========================
+// Used only if /api/pricing fails for any reason.
+const PRICES_NGN = {
+    personalFree: { weekly: 0, monthly: 0, yearly: 0 },
+    personalPremium: { weekly: 2500, monthly: 9500, yearly: 99000 },
+    businessUnverified: { weekly: 0, monthly: 0, yearly: 0 },
+    businessGold: { weekly: 15000, monthly: 55000, yearly: 580000 },
+    businessWhite: { weekly: 250000, monthly: 950000, yearly: 10000000 },
+} as const;
+
+type PriceKey = keyof typeof PRICES_NGN;
+
+// These keys must match your /api/pricing `prices` map keys.
+// If your API uses different keys, update this mapping only.
+const API_KEY: Record<PriceKey, string> = {
+    personalFree: "personalFree",
+    personalPremium: "personalPremium",
+    businessUnverified: "businessUnverified",
+    businessGold: "businessGold",
+    businessWhite: "businessWhite",
+};
 
 export default function PricingPage() {
     const [waitlistOpen, setWaitlistOpen] = useState(false);
@@ -319,20 +290,38 @@ export default function PricingPage() {
 
     const [pricing, setPricing] = useState<PricingApi | null>(null);
     const [pricingLoading, setPricingLoading] = useState(false);
-    const [pricingError, setPricingError] = useState<string | null>(null);
+
+    // Locale + currency (prefer server/IP-based via /api/pricing)
+    const [locale, setLocale] = useState("en-US");
+    const [currency, setCurrency] = useState<Currency>("USD");
+    const [autoCurrency, setAutoCurrency] = useState(true);
+
+    useEffect(() => {
+        const navLocale = typeof navigator !== "undefined" ? navigator.language : "en-US";
+        setLocale(navLocale || "en-US");
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
 
         async function load() {
             setPricingLoading(true);
-            setPricingError(null);
             try {
                 const res = await fetch(`/api/pricing?billing=${billing}`, { cache: "no-store" });
                 const data = (await res.json()) as PricingApi;
-                if (!cancelled) setPricing(data);
-            } catch (e: any) {
-                if (!cancelled) setPricingError("Failed to load regional pricing.");
+
+                if (cancelled) return;
+
+                setPricing(data);
+
+                // ✅ Corrected: prefer IP/geo currency returned by server.
+                if (data?.ok && data.currency) {
+                    const serverCur = normalizeCurrency(data.currency);
+                    setCurrency(serverCur);
+                    setAutoCurrency(true);
+                }
+            } catch {
+                if (!cancelled) setPricing(null);
             } finally {
                 if (!cancelled) setPricingLoading(false);
             }
@@ -344,86 +333,240 @@ export default function PricingPage() {
         };
     }, [billing]);
 
-
-    // Currency UI
-    const [locale, setLocale] = useState("en-NG");
-    const [currency, setCurrency] = useState<Currency>("NGN");
-    const [autoCurrency, setAutoCurrency] = useState(true);
-
-    useEffect(() => {
-        // Best-effort, client-only. True IP-based currency needs a server/API.
-        const navLocale = typeof navigator !== "undefined" ? navigator.language : "en-NG";
-        setLocale(navLocale || "en-NG");
-        const detected = detectCurrencyFromLocale(navLocale);
-        setCurrency(detected);
-    }, []);
-
     const year = useMemo(() => new Date().getFullYear(), []);
-
-    // =========================
-    // PRICES (BASE IN NGN)
-    // =========================
-    // These are intentionally “safe/luxury” to protect you from translation + call infra cost.
-    // You can tune down later after measuring real usage.
-    const PRICES_NGN = {
-        personalFree: { weekly: 0, monthly: 0, yearly: 0 },
-        personalPremium: {
-            weekly: 2500,
-            monthly: 9500,
-            yearly: 99000, // discounted
-        },
-        businessUnverified: { weekly: 0, monthly: 0, yearly: 0 },
-        businessGold: {
-            weekly: 15000,
-            monthly: 55000,
-            yearly: 580000, // discounted
-        },
-        businessWhite: {
-            weekly: 250000,
-            monthly: 950000,
-            yearly: 10000000, // discounted
-        },
-    } as const;
-
-    function priceNgnFor(plan: keyof typeof PRICES_NGN) {
-        return PRICES_NGN[plan][billing];
-    }
-
     const billingLabel = billing === "weekly" ? "per week" : billing === "monthly" ? "per month" : "per year";
 
-    const fx = FX_FROM_NGN[currency] ?? 1;
-
-    function displayPrice(plan: keyof typeof PRICES_NGN) {
-        const ngn = priceNgnFor(plan);
-        if (!autoCurrency || currency === "NGN") return formatMoney(ngn, "NGN", locale);
-        const converted = ngn * fx;
-        return formatMoney(converted, currency, locale, { isApprox: true });
+    function getServerPrice(plan: PriceKey): { amount: number; currency: Currency } | null {
+        if (!pricing?.ok) return null;
+        const k = API_KEY[plan];
+        const row = pricing.prices?.[k];
+        if (!row) return null;
+        return { amount: row.amount, currency: normalizeCurrency(row.currency) };
     }
 
-    function displayPriceBoth(plan: keyof typeof PRICES_NGN) {
-        const ngn = priceNgnFor(plan);
-        const primary = displayPrice(plan);
-        const secondary =
-            currency === "NGN" || !autoCurrency
-                ? ""
-                : `(${formatMoney(ngn, "NGN", "en-NG")} base)`;
-        return { primary, secondary };
+    function getFallbackPrice(plan: PriceKey): { amount: number; currency: Currency; isApprox: boolean } {
+        // Fallback: show NGN only (no leaking NGN alongside other currencies).
+        const ngn = PRICES_NGN[plan][billing];
+        return { amount: ngn, currency: "NGN", isApprox: false };
     }
 
-    const translationNote =
-        autoCurrency && currency !== "NGN"
-            ? "Currency is estimated from your browser locale (client-side). For exact IP-based currency + live FX, add a server pricing endpoint later."
-            : "Prices shown in NGN base. You can switch currency anytime.";
+    function displayPrice(plan: PriceKey) {
+        // 1) Prefer server price (IP-based currency). If user switches currency, we still show
+        // the server’s amount (most correct). If you want re-conversion client-side, do it on the server.
+        const server = getServerPrice(plan);
+        if (server && autoCurrency) return formatMoney(server.amount, server.currency, locale);
+
+        // 2) If user turned Auto off: still show server currency if available; otherwise fallback NGN.
+        if (server && !autoCurrency) return formatMoney(server.amount, server.currency, locale);
+
+        const fb = getFallbackPrice(plan);
+        return formatMoney(fb.amount, fb.currency, locale, { isApprox: fb.isApprox });
+    }
+
+    // ✅ Requirement: do NOT show NGN when displaying another currency
+    // So we removed the “(NGN base)” secondary label entirely.
+    function priceSubLabel() {
+        if (pricingLoading) return "Loading regional pricing…";
+        if (pricing?.ok && pricing.currency) return `${billingLabel}${billing === "yearly" ? " • discounted" : ""}`;
+        return `${billingLabel} • fallback pricing`;
+    }
+
+    const currencyNote =
+        pricing?.ok && pricing.currency
+            ? `Prices shown in ${normalizeCurrency(pricing.currency)} (IP/region). You can still switch display, but server pricing is the source of truth.`
+            : "Regional pricing not available right now. Showing fallback pricing.";
+
+    // =========================
+    // 6-CARD STRUCTURE (each plan has: 1) price card 2) benefits card)
+    // =========================
+    const personalPlans: Array<{
+        id: string;
+        title: string;
+        subtitle: string;
+        badge?: React.ReactNode;
+        priceKey: PriceKey;
+        primaryCta: { label: string; variant?: "default" | "primary"; onClick?: () => void; href?: string };
+        secondaryCta?: { label: string; href?: string; onClick?: () => void };
+        benefitsTitle: string;
+        benefits: string[];
+        footnote?: string;
+    }> = [
+            {
+                id: "p-free",
+                title: "Personal — Free",
+                subtitle: "For everyday chat with limited translation.",
+                priceKey: "personalFree",
+                primaryCta: { label: "Learn more", href: "/personal" },
+                benefitsTitle: "What you get",
+                benefits: [
+                    "Standard messaging",
+                    "Limited text translation (fair use)",
+                    "Basic media sharing",
+                    "Standard support",
+                    "No verified badge",
+                ],
+            },
+            {
+                id: "p-premium",
+                title: "Personal — Premium",
+                subtitle: "Family and friends, global conversation, and verified identity.",
+                badge: (
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
+                            Most chosen
+                        </span>
+                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
+                            🔵 Blue Tick
+                        </span>
+                    </div>
+                ),
+                priceKey: "personalPremium",
+                primaryCta: { label: "Subscribe to Personal Premium", variant: "primary", onClick: () => setWaitlistOpen(true) },
+                secondaryCta: { label: "Apply for verification", href: "#verification" },
+                benefitsTitle: "Everything in Free, plus",
+                benefits: [
+                    "🔵 Blue Tick (verified identity)",
+                    "Higher-quality real-time text translation (higher allocation)",
+                    "Voice-note translation (higher allocation)",
+                    "Call translation (fair-use allocation)",
+                    "Spam + impersonation protection boost",
+                    "Multi-device sync",
+                    "Advanced privacy controls",
+                    "Priority support",
+                    "Early access to new translation features",
+                    "Stronger account recovery protections",
+                ],
+                footnote:
+                    "Fair-use note: translation allocation covers normal personal usage. Extremely heavy usage may be rate-limited to protect stability.",
+            },
+            {
+                id: "p-gov",
+                title: "Government / Public Office",
+                subtitle: "A special classification for approved public officials and institutional accounts.",
+                priceKey: "personalFree",
+                primaryCta: { label: "See requirements", href: "#verification" },
+                benefitsTitle: "What it includes",
+                benefits: [
+                    "Uses Personal account foundation",
+                    "Carries a government affiliation notice when approved",
+                    "Not purchasable — approval after strict review",
+                    "Added protections against impersonation",
+                    "Clear badge description when users tap the badge",
+                    "Enhanced transparency disclaimers for safety",
+                ],
+                footnote: "This is not a paid badge. It is a classification applied after strict verification.",
+            },
+        ];
+
+    const businessPlans: Array<{
+        id: string;
+        title: string;
+        subtitle: string;
+        badge?: React.ReactNode;
+        priceKey: PriceKey;
+        primaryCta: { label: string; variant?: "default" | "primary"; onClick?: () => void; href?: string };
+        secondaryCta?: { label: string; href?: string; onClick?: () => void };
+        benefitsTitle: string;
+        benefits: string[];
+        footnote?: string;
+    }> = [
+            {
+                id: "b-unverified",
+                title: "Business — Unverified",
+                subtitle: "Chat normally, but business protections and reputation are locked until verified.",
+                priceKey: "businessUnverified",
+                primaryCta: { label: "Apply for business verification", href: "#verification" },
+                secondaryCta: { label: "Business overview", href: "/business" },
+                benefitsTitle: "What you get",
+                benefits: [
+                    "Standard chatting (no business badge)",
+                    "Limited reputation visibility",
+                    "No verified search/visibility boost",
+                    "No business protection tools",
+                    "Apply for verification to unlock business features",
+                ],
+            },
+            {
+                id: "b-gold",
+                title: "Business — Verified Sole Proprietor",
+                subtitle: "Verified small businesses, freelancers, vendors, and operators.",
+                badge: (
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
+                            🟡 Gold Tick
+                        </span>
+                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
+                            Best for SMEs
+                        </span>
+                    </div>
+                ),
+                priceKey: "businessGold",
+                primaryCta: { label: "Subscribe to Gold Tick", variant: "primary", onClick: () => setWaitlistOpen(true) },
+                secondaryCta: { label: "See requirements", href: "#verification" },
+                benefitsTitle: "Everything in Unverified, plus",
+                benefits: [
+                    "🟡 Gold Tick (verified business identity)",
+                    "Business profile: category, description, contact, hours",
+                    "Higher translation allocation for customer conversations",
+                    "Voice-note translation for customer orders/support",
+                    "Call translation allocation for sales/support calls",
+                    "Business anti-impersonation monitoring + faster takedown review",
+                    "Customer trust visibility (badge meaning on tap)",
+                    "Invoice/contact quick-actions inside chat",
+                    "Faster dispute reporting + moderation review",
+                    "Priority support escalation",
+                    "Better visibility in business discovery (when enabled)",
+                ],
+                footnote:
+                    "Gold is priced for serious business usage (orders, customer support, cross-border clients). It protects 6chatting from translation + call costs while you scale.",
+            },
+            {
+                id: "b-white",
+                title: "Business — Elite Brand Verification",
+                subtitle: "Reserved for reputable top brands and approved elite businesses.",
+                badge: (
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
+                            ⚪ White Tick
+                        </span>
+                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
+                            Elite
+                        </span>
+                    </div>
+                ),
+                priceKey: "businessWhite",
+                primaryCta: { label: "Request White Tick Review", variant: "primary", onClick: () => setWaitlistOpen(true) },
+                secondaryCta: { label: "See requirements", href: "#verification" },
+                benefitsTitle: "Everything in Gold, plus",
+                benefits: [
+                    "⚪ White Tick (elite trust + reputation protection)",
+                    "Maximum translation quality tier + highest allocation",
+                    "Higher concurrency: more customer chats at once",
+                    "Priority routing for calls + improved stability",
+                    "Faster impersonation takedown escalation",
+                    "Dedicated escalation support channel",
+                    "Brand protection: verified name enforcement + reserved identity checks",
+                    "Executive-level fraud monitoring (high risk signals)",
+                    "Advanced reputation visibility across the platform",
+                    "Priority onboarding for brand pages (when enabled)",
+                    "Optional business verification concierge (when available)",
+                ],
+                footnote:
+                    "White Tick is intentionally luxury priced to protect 6chatting against heavy enterprise translation and call usage. It is not meant for small businesses.",
+            },
+        ];
+
+    const plans = tab === "personal" ? personalPlans : businessPlans;
 
     return (
-        <main className="mx-auto w-[min(1120px,calc(100%-24px))] pb-14">
+        <main className="mx-auto w-[min(1320px,calc(100%-32px))] pb-14">
             {/* HERO */}
-            <section className="grid gap-4 pt-6 sm:pt-10 md:grid-cols-[1.05fr_.95fr]">
+            <section className="grid gap-5 pt-6 sm:pt-10 lg:grid-cols-[1.06fr_.94fr] lg:items-start">
                 <BevelCard className="p-5 sm:p-7">
                     <Pill>Pricing • Premium translation, verified trust, and safe infrastructure</Pill>
 
                     <h1
-                        className="mt-4 text-[clamp(28px,6vw,52px)] font-extrabold leading-[1.05] tracking-[-0.045em] text-black"
+                        className="mt-4 text-[clamp(28px,5vw,56px)] font-extrabold leading-[1.05] tracking-[-0.045em] text-black"
                         style={{ fontFamily: "var(--font-display)" }}
                     >
                         Choose your level.
@@ -503,11 +646,14 @@ export default function PricingPage() {
                                 <div className="rounded-2xl border border-black/10 bg-white/90 p-3 shadow-[10px_10px_22px_rgba(0,0,0,0.06),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
                                     <div className="flex items-center justify-between gap-2">
                                         <div className="min-w-0">
-                                            <div className="text-[12.5px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
+                                            <div
+                                                className="text-[12.5px] font-extrabold tracking-[-0.02em]"
+                                                style={{ fontFamily: "var(--font-display)" }}
+                                            >
                                                 Currency display
                                             </div>
                                             <div className="mt-1 text-[12px] font-medium text-neutral-600 whitespace-normal break-words leading-[1.6]">
-                                                {translationNote}
+                                                {currencyNote}
                                             </div>
                                         </div>
 
@@ -535,15 +681,11 @@ export default function PricingPage() {
                                         </div>
 
                                         <label className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]">
-                                            <span className="text-neutral-600">Show prices in:</span>{" "}
+                                            <span className="text-neutral-600">Display currency:</span>{" "}
                                             <select
                                                 className="ml-2 bg-transparent font-extrabold outline-none"
                                                 value={currency}
-                                                onChange={(e) => {
-                                                    const next = e.target.value as Currency;
-                                                    setCurrency(next);
-                                                    setAutoCurrency(true); // keep auto conversion on, but user-selected currency
-                                                }}
+                                                onChange={(e) => setCurrency(normalizeCurrency(e.target.value))}
                                                 aria-label="Select currency"
                                             >
                                                 {(Object.keys(CURRENCY_LABELS) as Currency[]).map((c) => (
@@ -553,6 +695,12 @@ export default function PricingPage() {
                                                 ))}
                                             </select>
                                         </label>
+                                    </div>
+
+                                    <div className="mt-3 text-[12px] font-medium text-neutral-600 whitespace-normal break-words leading-[1.7]">
+                                        {pricingLoading ? "Detecting regional pricing…" : null}
+                                        {!pricingLoading && pricing?.ok ? "Server pricing uses your region/IP (recommended)." : null}
+                                        {!pricingLoading && !pricing?.ok ? "Server pricing unavailable; fallback pricing is shown." : null}
                                     </div>
                                 </div>
 
@@ -566,9 +714,9 @@ export default function PricingPage() {
                                                 Why premium is “safe priced”
                                             </div>
                                             <div className="mt-1 text-[12.5px] font-medium text-neutral-700 whitespace-normal break-words leading-[1.7]">
-                                                Translation (text + voice + calls) has real infrastructure costs. These plans are priced to protect
-                                                6chatting from losses while delivering a luxury experience: quality translation, low latency calls,
-                                                and faster trust enforcement.
+                                                Translation (text + voice + calls) has real infrastructure costs. These plans are priced to protect 6chatting
+                                                from losses while delivering a luxury experience: quality translation, low latency calls, and faster trust
+                                                enforcement.
                                             </div>
                                         </div>
                                     </div>
@@ -591,7 +739,7 @@ export default function PricingPage() {
                 </BevelCard>
 
                 {/* Right: Trust + “what you pay for” */}
-                <div className="grid gap-4">
+                <div className="grid gap-5 min-w-0">
                     <BevelCard className="p-5 sm:p-6">
                         <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
@@ -712,375 +860,96 @@ export default function PricingPage() {
                 </div>
             </section>
 
-            {/* PRICING CARDS */}
+            {/* PRICING (6 cards) */}
             <section className="pt-8 sm:pt-10">
-                {tab === "personal" ? (
-                    <div className="grid gap-4 md:grid-cols-3">
-                        {/* Personal Free */}
-                        <BevelCard className="p-5 sm:p-6">
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                    <div className="text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
-                                        Personal — Free
+                {/* ✅ Desktop not squished: auto-fit grid + larger container + stronger gaps */}
+                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    {plans.flatMap((p) => {
+                        const price = displayPrice(p.priceKey);
+                        return [
+                            // 1) Price card
+                            <BevelCard key={`${p.id}-price`} className="p-5 sm:p-6 min-w-0">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        {p.badge ? <div className="mb-2">{p.badge}</div> : null}
+                                        <div className="text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
+                                            {p.title}
+                                        </div>
+                                        <div className="mt-1 text-[12.5px] font-medium text-neutral-600 whitespace-normal break-words">
+                                            {p.subtitle}
+                                        </div>
                                     </div>
-                                    <div className="mt-1 text-[12.5px] font-medium text-neutral-600 whitespace-normal break-words">
-                                        For everyday chat with limited translation.
+                                    <LogoBadge />
+                                </div>
+
+                                <div className="mt-4">
+                                    <div className="text-[30px] font-extrabold tracking-[-0.03em]" style={{ fontFamily: "var(--font-display)" }}>
+                                        {price}
                                     </div>
+                                    <div className="mt-1 text-[12.5px] font-semibold text-neutral-600">{priceSubLabel()}</div>
                                 </div>
-                                <LogoBadge />
-                            </div>
 
-                            <div className="mt-4">
-                                <div className="text-[30px] font-extrabold tracking-[-0.03em]" style={{ fontFamily: "var(--font-display)" }}>
-                                    {displayPrice("personalFree")}
-                                </div>
-                                <div className="mt-1 text-[12.5px] font-semibold text-neutral-600">Always free</div>
-                            </div>
-
-                            <div className="mt-4 grid gap-2">
-                                {[
-                                    "Standard messaging",
-                                    "Limited text translation (fair use)",
-                                    "Basic media sharing",
-                                    "Standard support",
-                                    "No verified badge",
-                                ].map((t) => (
-                                    <div
-                                        key={t}
-                                        className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 whitespace-normal break-words shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
+                                <div className="mt-5 grid gap-2">
+                                    <Button
+                                        variant={p.primaryCta.variant ?? "default"}
+                                        onClick={p.primaryCta.onClick}
+                                        href={p.primaryCta.href}
+                                        className="w-full"
                                     >
-                                        {t}
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-5 grid gap-2">
-                                <Button href="/personal" className="w-full">
-                                    Learn more
-                                </Button>
-                            </div>
-                        </BevelCard>
-
-                        {/* Personal Premium (Blue Tick) */}
-                        <BevelCard className="p-5 sm:p-6">
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
-                                            Most chosen
-                                        </span>
-                                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
-                                            🔵 Blue Tick
-                                        </span>
-                                    </div>
-
-                                    <div className="mt-2 text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
-                                        Personal — Premium
-                                    </div>
-
-                                    <div className="mt-1 text-[12.5px] font-medium text-neutral-600 whitespace-normal break-words">
-                                        Family and friends, global conversation, and verified identity.
-                                    </div>
+                                        {p.primaryCta.label}
+                                    </Button>
+                                    {p.secondaryCta ? (
+                                        <Button onClick={p.secondaryCta.onClick} href={p.secondaryCta.href} className="w-full">
+                                            {p.secondaryCta.label}
+                                        </Button>
+                                    ) : null}
                                 </div>
-                                <LogoBadge />
-                            </div>
 
-                            <div className="mt-4">
-                                {(() => {
-                                    const p = displayPriceBoth("personalPremium");
-                                    return (
-                                        <>
-                                            <div className="text-[30px] font-extrabold tracking-[-0.03em]" style={{ fontFamily: "var(--font-display)" }}>
-                                                {p.primary}
-                                            </div>
-                                            <div className="mt-1 text-[12.5px] font-semibold text-neutral-600">
-                                                {billingLabel} {billing === "yearly" ? "• discounted" : ""}
-                                                {p.secondary ? <span className="ml-2 text-[12px] font-semibold text-neutral-500">{p.secondary}</span> : null}
-                                            </div>
-                                        </>
-                                    );
-                                })()}
-                            </div>
-
-                            <div className="mt-4 grid gap-2">
-                                {[
-                                    "🔵 Blue Tick (verified identity)",
-                                    "High-quality real-time text translation (higher allocation)",
-                                    "Voice-note translation (higher allocation)",
-                                    "Call translation (fair-use allocation)",
-                                    "Spam + impersonation protection boost",
-                                    "Multi-device sync",
-                                    "Advanced privacy controls",
-                                    "Priority support",
-                                ].map((t) => (
-                                    <div
-                                        key={t}
-                                        className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 whitespace-normal break-words shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
-                                    >
-                                        {t}
+                                {p.footnote ? (
+                                    <div className="mt-3 rounded-2xl border border-black/10 bg-white/90 p-4 text-[12px] font-medium text-neutral-700 whitespace-normal break-words leading-[1.75] shadow-[10px_10px_22px_rgba(0,0,0,0.06),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
+                                        {p.footnote}
                                     </div>
-                                ))}
-                            </div>
+                                ) : null}
+                            </BevelCard>,
 
-                            <div className="mt-5 grid gap-2">
-                                <Button variant="primary" onClick={() => setWaitlistOpen(true)} className="w-full">
-                                    Subscribe to Personal Premium
-                                </Button>
-                                <Button href="#verification" className="w-full">
-                                    Apply for verification
-                                </Button>
-                            </div>
-
-                            <div className="mt-3 rounded-2xl border border-black/10 bg-white/90 p-4 text-[12px] font-medium text-neutral-700 whitespace-normal break-words leading-[1.75] shadow-[10px_10px_22px_rgba(0,0,0,0.06),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                                Fair-use note: translation allocation is designed to cover normal personal usage. Extremely heavy usage may
-                                be rate-limited to protect platform stability.
-                            </div>
-                        </BevelCard>
-
-                        {/* Personal: Government note card */}
-                        <BevelCard className="p-5 sm:p-6">
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                    <div className="text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
-                                        Government / Public Office
+                            // 2) Benefits card (the “value” listing users asked for)
+                            <BevelCard key={`${p.id}-benefits`} className="p-5 sm:p-6 min-w-0">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <Pill>{p.benefitsTitle}</Pill>
+                                        <div className="mt-3 text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
+                                            Benefits included
+                                        </div>
+                                        <div className="mt-1 text-[12.5px] font-medium text-neutral-600 whitespace-normal break-words leading-[1.6]">
+                                            Clear value breakdown so users understand what they unlock.
+                                        </div>
                                     </div>
-                                    <div className="mt-1 text-[12.5px] font-medium text-neutral-600 whitespace-normal break-words">
-                                        A special classification for approved public officials and institutional accounts.
-                                    </div>
+                                    <LogoBadge />
                                 </div>
-                                <LogoBadge />
-                            </div>
 
-                            <div className="mt-4 grid gap-2">
-                                {[
-                                    "Uses Personal account foundation",
-                                    "Carries a government affiliation notice when approved",
-                                    "Not purchasable — approval after strict review",
-                                    "Added protections against impersonation",
-                                    "Clear badge description when users tap the badge",
-                                ].map((t) => (
-                                    <div
-                                        key={t}
-                                        className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 whitespace-normal break-words shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
-                                    >
-                                        {t}
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-5 grid gap-2">
-                                <Button href="#verification" className="w-full">
-                                    See requirements
-                                </Button>
-                            </div>
-                        </BevelCard>
-                    </div>
-                ) : (
-                    <div className="grid gap-4 md:grid-cols-3">
-                        {/* Business Unverified */}
-                        <BevelCard className="p-5 sm:p-6">
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                    <div className="text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
-                                        Business — Unverified
-                                    </div>
-                                    <div className="mt-1 text-[12.5px] font-medium text-neutral-600 whitespace-normal break-words">
-                                        Chat normally, but business protections and reputation are locked until verified.
-                                    </div>
+                                <div className="mt-4 grid gap-2">
+                                    {p.benefits.map((t) => (
+                                        <div
+                                            key={t}
+                                            className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 whitespace-normal break-words shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
+                                        >
+                                            {t}
+                                        </div>
+                                    ))}
                                 </div>
-                                <LogoBadge />
-                            </div>
 
-                            <div className="mt-4">
-                                <div className="text-[30px] font-extrabold tracking-[-0.03em]" style={{ fontFamily: "var(--font-display)" }}>
-                                    {displayPrice("businessUnverified")}
+                                <div className="mt-5 grid gap-2">
+                                    <Button href="#verification" className="w-full">
+                                        See verification requirements
+                                    </Button>
                                 </div>
-                                <div className="mt-1 text-[12.5px] font-semibold text-neutral-600">Chat access only</div>
-                            </div>
-
-                            <div className="mt-4 grid gap-2">
-                                {[
-                                    "Standard chatting (no business badge)",
-                                    "Limited reputation visibility",
-                                    "No verified search/visibility boost",
-                                    "No business protection tools",
-                                    "Apply for verification to unlock business features",
-                                ].map((t) => (
-                                    <div
-                                        key={t}
-                                        className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 whitespace-normal break-words shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
-                                    >
-                                        {t}
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-5 grid gap-2">
-                                <Button href="#verification" className="w-full">
-                                    Apply for business verification
-                                </Button>
-                                <Button href="/business" className="w-full">
-                                    Business overview
-                                </Button>
-                            </div>
-                        </BevelCard>
-
-                        {/* Business Gold */}
-                        <BevelCard className="p-5 sm:p-6">
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
-                                            🟡 Gold Tick
-                                        </span>
-                                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
-                                            Best for SMEs
-                                        </span>
-                                    </div>
-
-                                    <div className="mt-2 text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
-                                        Business — Verified Sole Proprietor
-                                    </div>
-
-                                    <div className="mt-1 text-[12.5px] font-medium text-neutral-600 whitespace-normal break-words">
-                                        Verified small businesses, freelancers, vendors, and operators.
-                                    </div>
-                                </div>
-                                <LogoBadge />
-                            </div>
-
-                            <div className="mt-4">
-                                {(() => {
-                                    const p = displayPriceBoth("businessGold");
-                                    return (
-                                        <>
-                                            <div className="text-[30px] font-extrabold tracking-[-0.03em]" style={{ fontFamily: "var(--font-display)" }}>
-                                                {p.primary}
-                                            </div>
-                                            <div className="mt-1 text-[12.5px] font-semibold text-neutral-600">
-                                                {billingLabel} {billing === "yearly" ? "• discounted" : ""}
-                                                {p.secondary ? <span className="ml-2 text-[12px] font-semibold text-neutral-500">{p.secondary}</span> : null}
-                                            </div>
-                                        </>
-                                    );
-                                })()}
-                            </div>
-
-                            <div className="mt-4 grid gap-2">
-                                {[
-                                    "🟡 Gold Tick (verified business identity)",
-                                    "Business profile: category, description, contact, hours",
-                                    "Higher translation allocation for customer conversations",
-                                    "Voice-note translation for customer orders/support",
-                                    "Call translation allocation for sales/support calls",
-                                    "Business anti-impersonation monitoring + faster takedown review",
-                                    "Invoice/contact quick-actions inside chat",
-                                    "Priority support",
-                                ].map((t) => (
-                                    <div
-                                        key={t}
-                                        className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 whitespace-normal break-words shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
-                                    >
-                                        {t}
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-5 grid gap-2">
-                                <Button variant="primary" onClick={() => setWaitlistOpen(true)} className="w-full">
-                                    Subscribe to Gold Tick
-                                </Button>
-                                <Button href="#verification" className="w-full">
-                                    See requirements
-                                </Button>
-                            </div>
-
-                            <div className="mt-3 rounded-2xl border border-black/10 bg-white/90 p-4 text-[12px] font-medium text-neutral-700 whitespace-normal break-words leading-[1.75] shadow-[10px_10px_22px_rgba(0,0,0,0.06),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                                Gold is designed to keep you safe from translation + call costs while you scale. It is priced for serious
-                                business usage (customer support, orders, cross-border clients).
-                            </div>
-                        </BevelCard>
-
-                        {/* Business White */}
-                        <BevelCard className="p-5 sm:p-6">
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
-                                            ⚪ White Tick
-                                        </span>
-                                        <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-extrabold">
-                                            Elite
-                                        </span>
-                                    </div>
-
-                                    <div className="mt-2 text-sm font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
-                                        Business — Elite Brand Verification
-                                    </div>
-
-                                    <div className="mt-1 text-[12.5px] font-medium text-neutral-600 whitespace-normal break-words">
-                                        Reserved for reputable top brands and approved elite businesses.
-                                    </div>
-                                </div>
-                                <LogoBadge />
-                            </div>
-
-                            <div className="mt-4">
-                                {(() => {
-                                    const p = displayPriceBoth("businessWhite");
-                                    return (
-                                        <>
-                                            <div className="text-[30px] font-extrabold tracking-[-0.03em]" style={{ fontFamily: "var(--font-display)" }}>
-                                                {p.primary}
-                                            </div>
-                                            <div className="mt-1 text-[12.5px] font-semibold text-neutral-600">
-                                                {billingLabel} {billing === "yearly" ? "• discounted" : ""}
-                                                {p.secondary ? <span className="ml-2 text-[12px] font-semibold text-neutral-500">{p.secondary}</span> : null}
-                                            </div>
-                                        </>
-                                    );
-                                })()}
-                            </div>
-
-                            <div className="mt-4 grid gap-2">
-                                {[
-                                    "⚪ White Tick (elite trust + reputation protection)",
-                                    "Maximum translation quality tier + highest allocation",
-                                    "Higher concurrency: more customer chats at once",
-                                    "Priority routing for calls + improved stability",
-                                    "Faster impersonation takedown escalation",
-                                    "Dedicated escalation support channel",
-                                    "Brand protection: verified name enforcement + reserved identity checks",
-                                    "Exclusive business trust visibility across the platform",
-                                ].map((t) => (
-                                    <div
-                                        key={t}
-                                        className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 whitespace-normal break-words shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
-                                    >
-                                        {t}
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-5 grid gap-2">
-                                <Button variant="primary" onClick={() => setWaitlistOpen(true)} className="w-full">
-                                    Request White Tick Review
-                                </Button>
-                                <Button href="#verification" className="w-full">
-                                    See requirements
-                                </Button>
-                            </div>
-
-                            <div className="mt-3 rounded-2xl border border-black/10 bg-white/90 p-4 text-[12px] font-medium text-neutral-700 whitespace-normal break-words leading-[1.75] shadow-[10px_10px_22px_rgba(0,0,0,0.06),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                                White Tick is intentionally “luxury priced” to protect 6chatting against heavy enterprise translation and
-                                call usage. It is not meant for small businesses.
-                            </div>
-                        </BevelCard>
-                    </div>
-                )}
+                            </BevelCard>,
+                        ];
+                    })}
+                </div>
             </section>
 
-            {/* “EXPLANATION” SECTION — make it personal + business explanatory */}
+            {/* “EXPLANATION” SECTION */}
             <section className="pt-8 sm:pt-10">
                 <BevelCard className="p-6 sm:p-8">
                     <div className="flex items-start justify-between gap-3">
@@ -1093,9 +962,9 @@ export default function PricingPage() {
                                 Transparent value, not confusion.
                             </h2>
                             <p className="mt-2 text-[14px] leading-[1.8] text-neutral-700 whitespace-normal break-words">
-                                Premium on 6chatting is designed around a simple truth: translation and calls cost money. Your subscription
-                                pays for translation allocation, call infrastructure, and reputation protection—so the platform stays stable,
-                                safe, and high quality.
+                                Premium on 6chatting is designed around a simple truth: translation and calls cost money. Your subscription pays for
+                                translation allocation, call infrastructure, and reputation protection—so the platform stays stable, safe, and high
+                                quality.
                             </p>
                         </div>
                         <LogoBadge />
@@ -1107,24 +976,14 @@ export default function PricingPage() {
                                 title: "Personal plans",
                                 desc:
                                     "Best for individuals who want verified identity, better translation quality, and safer conversations. You pay to unlock higher translation allocation, voice-note translation, and call translation.",
-                                bullets: [
-                                    "Verified identity (Blue Tick)",
-                                    "Better translation allocation",
-                                    "Call translation allocation",
-                                    "Priority support & safety",
-                                ],
+                                bullets: ["Verified identity (Blue Tick)", "Better translation allocation", "Call translation allocation", "Priority support & safety"],
                                 icon: <IconBadge />,
                             },
                             {
                                 title: "Business plans",
                                 desc:
                                     "Best for sellers and brands who chat with customers across languages. You pay to unlock business trust features, higher translation allocation, and faster protection against impersonation.",
-                                bullets: [
-                                    "Verified business identity (Gold/White)",
-                                    "Higher customer translation allocation",
-                                    "Call translation allocation for sales/support",
-                                    "Business protections + escalation",
-                                ],
+                                bullets: ["Verified business identity (Gold/White)", "Higher customer translation allocation", "Call translation allocation for sales/support", "Business protections + escalation"],
                                 icon: <IconBriefcase />,
                             },
                             {
@@ -1167,15 +1026,15 @@ export default function PricingPage() {
                             Billing policy (simple)
                         </div>
                         <div className="mt-2 text-[13px] font-medium leading-[1.75] text-neutral-700 whitespace-normal break-words">
-                            Translation and call translation are offered as allocations inside each plan. This keeps pricing predictable
-                            and protects the platform. If usage becomes extreme, 6chatting may apply fair-use limits to maintain quality
-                            for everyone. Verified business accounts receive higher allocations and priority handling.
+                            Translation and call translation are offered as allocations inside each plan. This keeps pricing predictable and protects
+                            the platform. If usage becomes extreme, 6chatting may apply fair-use limits to maintain quality for everyone. Verified
+                            business accounts receive higher allocations and priority handling.
                         </div>
                     </div>
                 </BevelCard>
             </section>
 
-            {/* VERIFICATION FLOW (CATEGORY SELECTOR + REQUIREMENTS) */}
+            {/* VERIFICATION FLOW */}
             <section id="verification" className="pt-8 sm:pt-10 scroll-mt-24">
                 <BevelCard className="p-6 sm:p-8">
                     <div className="flex items-start justify-between gap-3">
@@ -1188,9 +1047,9 @@ export default function PricingPage() {
                                 Apply for verification.
                             </h2>
                             <p className="mt-2 text-[14px] leading-[1.8] text-neutral-700 whitespace-normal break-words">
-                                Verification on 6chatting is structured by category. You can chat normally without verification, but verified
-                                reputation unlocks protections, visibility, and advanced experience levels. Select your category to see what
-                                you are expected to provide.
+                                Verification on 6chatting is structured by category. You can chat normally without verification, but verified reputation
+                                unlocks protections, visibility, and advanced experience levels. Select your category to see what you are expected to
+                                provide.
                             </p>
                         </div>
                         <LogoBadge />
@@ -1318,8 +1177,8 @@ export default function PricingPage() {
                                                 </div>
                                             ))}
                                             <div className="mt-2 rounded-2xl border border-black/10 bg-white/90 p-4 text-[12.5px] font-medium text-neutral-700 whitespace-normal break-words leading-[1.75] shadow-[10px_10px_22px_rgba(0,0,0,0.06),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                                                🟡 Gold Tick unlocks business tools and protections. Business accounts can chat without verification,
-                                                but reputation and business protections remain locked until approved.
+                                                🟡 Gold Tick unlocks business tools and protections. Business accounts can chat without verification, but
+                                                reputation and business protections remain locked until approved.
                                             </div>
                                         </>
                                     )}
@@ -1342,8 +1201,8 @@ export default function PricingPage() {
                                                 </div>
                                             ))}
                                             <div className="mt-2 rounded-2xl border border-black/10 bg-white/90 p-4 text-[12.5px] font-medium text-neutral-700 whitespace-normal break-words leading-[1.75] shadow-[10px_10px_22px_rgba(0,0,0,0.06),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                                                ⚪ White Tick is the highest business level on 6chatting. It is reserved for reputable top brands and comes
-                                                with exclusive protections, visibility advantages, and priority handling.
+                                                ⚪ White Tick is the highest business level on 6chatting. It is reserved for reputable top brands and comes with
+                                                exclusive protections, visibility advantages, and priority handling.
                                             </div>
                                         </>
                                     )}
@@ -1367,13 +1226,13 @@ export default function PricingPage() {
                                             ))}
 
                                             <div className="mt-2 rounded-2xl border border-black/10 bg-white/90 p-4 text-[12.5px] font-medium text-neutral-700 whitespace-normal break-words leading-[1.75] shadow-[10px_10px_22px_rgba(0,0,0,0.06),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                                                Government / Public Office verification is a classification (not a purchasable badge). Approved accounts
-                                                carry a visible affiliation notice for transparency and safety.
+                                                Government / Public Office verification is a classification (not a purchasable badge). Approved accounts carry a
+                                                visible affiliation notice for transparency and safety.
                                             </div>
 
                                             <div className="rounded-2xl border border-black/10 bg-white/90 p-4 text-[12px] font-medium text-neutral-600 whitespace-normal break-words leading-[1.75] shadow-[10px_10px_22px_rgba(0,0,0,0.05),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                                                Disclaimer: 6chatting does not represent or speak for any government. Statements remain the responsibility
-                                                of the account holder. Affiliation labels are used for transparency and safety.
+                                                Disclaimer: 6chatting does not represent or speak for any government. Statements remain the responsibility of the
+                                                account holder. Affiliation labels are used for transparency and safety.
                                             </div>
                                         </>
                                     )}
@@ -1404,7 +1263,7 @@ export default function PricingPage() {
                         {[
                             {
                                 q: "Can you show currency automatically based on IP address?",
-                                a: "Yes—but not safely from a client-only page. IP-based currency needs a server endpoint (or Edge middleware) to read IP/Geo and return the correct currency + live exchange rates. This page uses a best-effort browser-locale estimate for now.",
+                                a: "Yes. This page now prioritizes the currency returned by your /api/pricing endpoint (server-side), which can use region/IP. Client-only locale detection is not reliable for IP currency.",
                             },
                             {
                                 q: "Why is Premium required for high translation usage?",
