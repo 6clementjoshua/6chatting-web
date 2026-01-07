@@ -13,7 +13,7 @@ function LogoBadge({ size = 56, className = "" }: { size?: number; className?: s
             aria-hidden="true"
         >
             <Image
-                src="/6ix_logo_splash.PNG" // ✅ or "/6logo.PNG" if that is what you use on web
+                src="/6logo.PNG" // ✅ or "/6logo.PNG" if that is what you use on web
                 alt="6chatting"
                 fill
                 sizes={`${size}px`}
