@@ -48,6 +48,13 @@ export default function ServerErrorPage() {
                     <div>Cross River State, Calabar, Nigeria</div>
                     <div className="muted">© 6chatting. All rights reserved.</div>
                 </div>
+                <div
+                    dangerouslySetInnerHTML={{
+                        __html: "::CLOUDFLARE_ERROR_500S_BOX::",
+                    }}
+                    aria-hidden="true"
+                />
+
             </section>
 
             <style>{`
