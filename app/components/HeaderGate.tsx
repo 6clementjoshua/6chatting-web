@@ -10,6 +10,7 @@ export default function HeaderGate() {
     const hide =
         pathname === "/access-restricted" ||
         pathname === "/waf-blocked";
+        pathname === "/server-error";
 
     if (hide) return null;
     return <Header />;
