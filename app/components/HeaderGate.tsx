@@ -9,7 +9,7 @@ export default function HeaderGate() {
     // ✅ Hide header on Cloudflare/system pages
     const hide =
         pathname === "/access-restricted" ||
-        pathname === "/waf-blocked";
+        pathname === "/waf-blocked" ||
         pathname === "/server-error";
 
     if (hide) return null;
