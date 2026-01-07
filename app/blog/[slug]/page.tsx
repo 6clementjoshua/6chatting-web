@@ -1,10 +1,11 @@
+// app/blog/[slug]/page.tsx
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
-import { getPostBySlug, BlogBlock, BlogMedia } from "../data";
+import { getPostBySlug, BlogBlock } from "../data";
 
 function cx(...parts: Array<string | false | undefined | null>) {
     return parts.filter(Boolean).join(" ");
@@ -44,60 +45,32 @@ const Pill = ({ children, className = "" }: { children: React.ReactNode; classNa
     </span>
 );
 
-function renderMedia(items: BlogMedia[]) {
-    return (
-        <div className="grid gap-3">
-            {items.map((m, i) => {
-                if (m.type === "image") {
-                    return (
-                        <div key={i} className="rounded-3xl border border-black/10 bg-white/85 p-4 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-black/10 bg-white">
-                                <Image src={m.src} alt={m.alt || "blog image"} fill className="object-cover" />
-                            </div>
-                            {m.caption ? <div className="mt-2 text-[12.5px] font-medium text-neutral-700">{m.caption}</div> : null}
-                        </div>
-                    );
-                }
-                if (m.type === "video") {
-                    return (
-                        <div key={i} className="rounded-3xl border border-black/10 bg-white/85 p-4 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                            <video className="w-full rounded-2xl border border-black/10" controls playsInline preload="metadata" poster={m.poster}>
-                                <source src={m.src} />
-                            </video>
-                            {m.caption ? <div className="mt-2 text-[12.5px] font-medium text-neutral-700">{m.caption}</div> : null}
-                        </div>
-                    );
-                }
-                if (m.type === "audio") {
-                    return (
-                        <div key={i} className="rounded-3xl border border-black/10 bg-white/85 p-4 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                            <audio className="w-full" controls preload="metadata">
-                                <source src={m.src} />
-                            </audio>
-                            {m.caption ? <div className="mt-2 text-[12.5px] font-medium text-neutral-700">{m.caption}</div> : null}
-                        </div>
-                    );
-                }
-                return (
-                    <div key={i} className="rounded-3xl border border-black/10 bg-white/85 p-4 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
-                        <Link className="water-btn water-btn-primary inline-flex px-4 py-3 text-sm font-semibold" href={m.href} target="_blank" rel="noopener noreferrer">
-                            {m.label}
-                        </Link>
-                    </div>
-                );
-            })}
-        </div>
-    );
+// ✅ Real-time published date label (absolute + relative)
+function formatPublished(iso: string) {
+    const d = new Date(iso);
+    const now = new Date();
+
+    const abs = d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+
+    const days = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+    const rel = days <= 0 ? "today" : days === 1 ? "1 day ago" : `${days} days ago`;
+
+    return { abs, rel };
 }
 
 function renderBlock(b: BlogBlock, idx: number) {
     if (b.type === "heading") {
         return (
-            <h2 key={idx} className="text-[16px] sm:text-[17px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
+            <h2
+                key={idx}
+                className="text-[16px] sm:text-[17px] font-extrabold tracking-[-0.02em]"
+                style={{ fontFamily: "var(--font-display)" }}
+            >
                 {b.text}
             </h2>
         );
     }
+
     if (b.type === "paragraph") {
         return (
             <p key={idx} className="text-[13.5px] sm:text-[14px] font-medium leading-[1.9] text-neutral-700 whitespace-normal break-words">
@@ -105,6 +78,7 @@ function renderBlock(b: BlogBlock, idx: number) {
             </p>
         );
     }
+
     if (b.type === "bullets") {
         return (
             <div key={idx} className="grid gap-2">
@@ -119,17 +93,15 @@ function renderBlock(b: BlogBlock, idx: number) {
             </div>
         );
     }
-    if (b.type === "note") {
-        return (
-            <div
-                key={idx}
-                className="rounded-3xl border border-black/10 bg-white/85 p-5 text-[13px] font-medium leading-[1.85] text-neutral-700 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]"
-            >
-                {b.text}
-            </div>
-        );
-    }
-    return <div key={idx}>{renderMedia(b.items)}</div>;
+
+    return (
+        <div
+            key={idx}
+            className="rounded-3xl border border-black/10 bg-white/85 p-5 text-[13px] font-medium leading-[1.85] text-neutral-700 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]"
+        >
+            {b.text}
+        </div>
+    );
 }
 
 export default function BlogPostPage() {
@@ -138,6 +110,9 @@ export default function BlogPostPage() {
 
     const slug = params?.slug || "";
     const post = getPostBySlug(slug);
+
+    // ✅ published date info (computed at runtime)
+    const published = post ? formatPublished(post.publishedAt) : null;
 
     if (!post) {
         return (
@@ -149,9 +124,7 @@ export default function BlogPostPage() {
                             <h1 className="mt-4 text-2xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
                                 Post not found
                             </h1>
-                            <p className="mt-2 text-[14px] leading-[1.8] text-neutral-700">
-                                This post doesn’t exist yet. Go back to Blog.
-                            </p>
+                            <p className="mt-2 text-[14px] leading-[1.8] text-neutral-700">This post doesn’t exist yet. Go back to Blog.</p>
                             <div className="mt-5">
                                 <Link className="water-btn water-btn-primary inline-flex px-4 py-3 text-sm font-semibold" href="/blog">
                                     Back to Blog
@@ -174,6 +147,12 @@ export default function BlogPostPage() {
                             <div className="flex flex-wrap items-center gap-2">
                                 <Pill>6chatting Blog</Pill>
                                 <Pill>{post.category}</Pill>
+
+                                {/* ✅ THIS IS WHERE “PUBLISHED” SHOWS */}
+                                <Pill>
+                                    Published {published?.abs} • {published?.rel}
+                                </Pill>
+
                                 <Pill>{post.dateLabel}</Pill>
                                 <Pill>{post.readMins} min read</Pill>
                             </div>
@@ -185,15 +164,16 @@ export default function BlogPostPage() {
                                 {post.title}
                             </h1>
 
-                            <p className="mt-3 text-[14px] leading-[1.85] text-neutral-700 whitespace-normal break-words">
-                                {post.subtitle}
-                            </p>
+                            <p className="mt-3 text-[14px] leading-[1.85] text-neutral-700 whitespace-normal break-words">{post.subtitle}</p>
 
                             <div className="mt-5 flex flex-wrap gap-3">
                                 <Link href="/blog" className="water-btn inline-flex items-center justify-center px-4 py-3 text-sm font-semibold select-none">
                                     Back to Blog
                                 </Link>
-                                <Link href="/pricing" className="water-btn water-btn-primary inline-flex items-center justify-center px-4 py-3 text-sm font-semibold select-none">
+                                <Link
+                                    href="/pricing"
+                                    className="water-btn water-btn-primary inline-flex items-center justify-center px-4 py-3 text-sm font-semibold select-none"
+                                >
                                     View Pricing
                                 </Link>
                             </div>
@@ -202,18 +182,22 @@ export default function BlogPostPage() {
                         <LogoBadge />
                     </div>
 
-                    <div className="mt-7 grid gap-4">
-                        {post.content.map((b, idx) => renderBlock(b, idx))}
-                    </div>
+                    <div className="mt-7 grid gap-4">{post.content.map((b, idx) => renderBlock(b, idx))}</div>
                 </BevelCard>
             </section>
 
             <footer className="pt-10 text-neutral-700">
                 <div className="border-t border-black/10 pt-6">
                     <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[12px] font-semibold">
-                        <Link href="/policies/terms" target="_blank" rel="noopener noreferrer">Terms of Service</Link>
-                        <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
-                        <Link href="/policies/contact" target="_blank" rel="noopener noreferrer">Contact</Link>
+                        <Link href="/policies/terms" target="_blank" rel="noopener noreferrer">
+                            Terms of Service
+                        </Link>
+                        <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer">
+                            Privacy Policy
+                        </Link>
+                        <Link href="/policies/contact" target="_blank" rel="noopener noreferrer">
+                            Contact
+                        </Link>
                     </div>
 
                     <div className="mt-5 text-center text-xs font-normal text-neutral-600">
@@ -224,7 +208,9 @@ export default function BlogPostPage() {
 
             <style jsx global>{`
         @media (prefers-reduced-motion: no-preference) {
-          .water-bevel { transform: translateZ(0); }
+          .water-bevel {
+            transform: translateZ(0);
+          }
         }
       `}</style>
         </main>
