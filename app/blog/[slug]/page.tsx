@@ -3,7 +3,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { BLOG_POSTS, BlogSection } from "../_data";
 
 function cx(...parts: Array<string | false | undefined | null>) {
     return parts.filter(Boolean).join(" ");
@@ -44,9 +45,128 @@ const Pill = ({ children, className = "" }: { children: React.ReactNode; classNa
     </span>
 );
 
+function useNow(tickMs = 30_000) {
+    const [now, setNow] = useState(() => Date.now());
+    useEffect(() => {
+        const id = setInterval(() => setNow(Date.now()), tickMs);
+        return () => clearInterval(id);
+    }, [tickMs]);
+    return now;
+}
+
+function formatDateTime(iso: string, locale?: string) {
+    const d = new Date(iso);
+    try {
+        return new Intl.DateTimeFormat(locale || undefined, {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+        }).format(d);
+    } catch {
+        return d.toString();
+    }
+}
+
+function timeAgo(fromIso: string, nowMs: number) {
+    const from = new Date(fromIso).getTime();
+    const diff = Math.max(0, nowMs - from);
+    const sec = Math.floor(diff / 1000);
+    const min = Math.floor(sec / 60);
+    const hr = Math.floor(min / 60);
+    const day = Math.floor(hr / 24);
+    const week = Math.floor(day / 7);
+
+    if (sec < 15) return "just now";
+    if (sec < 60) return `${sec}s ago`;
+    if (min < 60) return `${min}m ago`;
+    if (hr < 24) return `${hr}h ago`;
+    if (day < 7) return `${day}d ago`;
+    return `${week}w ago`;
+}
+
+function renderSection(s: BlogSection, idx: number) {
+    if (s.type === "heading") {
+        return (
+            <h2
+                key={idx}
+                className="text-[16px] sm:text-[17px] font-extrabold tracking-[-0.02em]"
+                style={{ fontFamily: "var(--font-display)" }}
+            >
+                {s.text}
+            </h2>
+        );
+    }
+
+    if (s.type === "paragraph") {
+        return (
+            <p key={idx} className="text-[13.5px] sm:text-[14px] font-medium leading-[1.9] text-neutral-700 whitespace-normal break-words">
+                {s.text}
+            </p>
+        );
+    }
+
+    if (s.type === "bullets") {
+        return (
+            <div key={idx} className="grid gap-2">
+                {s.items.map((b) => (
+                    <div
+                        key={b}
+                        className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
+                    >
+                        {b}
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    // note
+    return (
+        <div
+            key={idx}
+            className="rounded-3xl border border-black/10 bg-white/85 p-5 text-[13px] font-medium leading-[1.85] text-neutral-700 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]"
+        >
+            {s.text}
+        </div>
+    );
+}
+
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
     const year = useMemo(() => new Date().getFullYear(), []);
-    const title = useMemo(() => params.slug.replace(/-/g, " "), [params.slug]);
+    const now = useNow(30_000);
+
+    const post = useMemo(() => BLOG_POSTS.find((p) => p.slug === params.slug), [params.slug]);
+
+    if (!post) {
+        return (
+            <main className="mx-auto w-[min(960px,calc(100%-24px))] pb-14">
+                <section className="pt-6 sm:pt-10">
+                    <BevelCard className="p-6 sm:p-8">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <Pill>6chatting Blog</Pill>
+                                <h1 className="mt-4 text-2xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+                                    Post not found
+                                </h1>
+                                <p className="mt-2 text-[14px] leading-[1.8] text-neutral-700">This article does not exist yet.</p>
+                                <div className="mt-5">
+                                    <Link className="water-btn water-btn-primary inline-flex px-4 py-3 text-sm font-semibold" href="/blog">
+                                        Back to Blog
+                                    </Link>
+                                </div>
+                            </div>
+                            <LogoBadge />
+                        </div>
+                    </BevelCard>
+                </section>
+            </main>
+        );
+    }
+
+    const whenIso = post.updatedAt || post.publishedAt;
+    const isUpdated = Boolean(post.updatedAt);
 
     return (
         <main className="mx-auto w-[min(960px,calc(100%-24px))] pb-14">
@@ -56,34 +176,31 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                         <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
                                 <Pill>6chatting Blog</Pill>
-                                <Pill>Launch 06/06/2026</Pill>
-                                <Pill>Placeholder post</Pill>
+                                <Pill>{post.category}</Pill>
+                                <Pill>{post.coverLabel || "Update"}</Pill>
+                                <Pill>
+                                    {isUpdated ? "Updated" : "Published"} {timeAgo(whenIso, now)} • {formatDateTime(whenIso)}
+                                </Pill>
+                                <Pill>{post.readMins} min read</Pill>
                             </div>
 
                             <h1
                                 className="mt-4 text-[clamp(24px,4.6vw,40px)] font-extrabold leading-[1.1] tracking-[-0.04em]"
                                 style={{ fontFamily: "var(--font-display)" }}
                             >
-                                {title}
+                                {post.title}
                             </h1>
 
                             <p className="mt-3 text-[14px] leading-[1.85] text-neutral-700 whitespace-normal break-words">
-                                This is a placeholder blog post page wired for routing. Later, you can replace this with real content from your CMS/database.
-                                For now, it ensures your blog feels live and premium immediately.
+                                {post.subtitle}
                             </p>
 
                             <div className="mt-5 flex flex-wrap gap-3">
-                                <Link
-                                    href="/blog"
-                                    className="water-btn inline-flex items-center justify-center px-4 py-3 text-sm font-semibold select-none"
-                                >
+                                <Link className="water-btn inline-flex px-4 py-3 text-sm font-semibold" href="/blog">
                                     Back to Blog
                                 </Link>
-                                <Link
-                                    href="/pricing"
-                                    className="water-btn water-btn-primary inline-flex items-center justify-center px-4 py-3 text-sm font-semibold select-none"
-                                >
-                                    View Pricing
+                                <Link className="water-btn water-btn-primary inline-flex px-4 py-3 text-sm font-semibold" href="/pricing">
+                                    View pricing
                                 </Link>
                             </div>
                         </div>
@@ -91,26 +208,28 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                         <LogoBadge />
                     </div>
 
-                    <div className="mt-6 grid gap-3">
-                        {[
-                            "Section heading placeholder — Overview",
-                            "Section heading placeholder — Key benefits",
-                            "Section heading placeholder — What users should expect next",
-                            "Section heading placeholder — Launch checklist",
-                        ].map((h) => (
-                            <div
-                                key={h}
-                                className="rounded-3xl border border-black/10 bg-white/85 p-5 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]"
-                            >
-                                <div className="text-[13.5px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-                                    {h}
+                    <div className="mt-7 grid gap-4">
+                        {post.content.map((s, idx) => renderSection(s, idx))}
+                    </div>
+
+                    <div className="mt-8 rounded-3xl border border-black/10 bg-white/85 p-5 shadow-[10px_10px_22px_rgba(0,0,0,0.08),_-10px_-10px_22px_rgba(255,255,255,0.95)]">
+                        <div className="text-[13.5px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+                            Next steps
+                        </div>
+                        <div className="mt-2 grid gap-2">
+                            {[
+                                "We can connect this blog to a database/CMS next (Supabase, Sanity, Strapi, Contentful, etc.).",
+                                "We can add an admin page to create/edit posts and auto-update the ‘updatedAt’ timestamp.",
+                                "We can add tags, author profiles, and a ‘featured’ section.",
+                            ].map((t) => (
+                                <div
+                                    key={t}
+                                    className="rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-[12.5px] font-semibold text-neutral-900 shadow-[8px_8px_18px_rgba(0,0,0,0.06),_-8px_-8px_18px_rgba(255,255,255,0.95)]"
+                                >
+                                    {t}
                                 </div>
-                                <div className="mt-2 text-[13px] font-medium leading-[1.75] text-neutral-700">
-                                    Placeholder paragraph content. Replace this with your final copy when you are ready. This layout is designed to feel premium,
-                                    readable, and consistent with your pricing page style.
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </BevelCard>
             </section>
