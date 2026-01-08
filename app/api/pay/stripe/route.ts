@@ -26,8 +26,8 @@ function toMinor(cur: string, whole: number) {
 
 export async function POST(req: Request) {
     try {
-        const site = process.env.NEXT_PUBLIC_SITE_URL;
-        if (!site) return NextResponse.json({ error: "Missing NEXT_PUBLIC_SITE_URL" }, { status: 500 });
+        const site = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL;
+        if (!site) return NextResponse.json({ error: "Missing SITE_URL" }, { status: 500 });
 
         const stripe = getStripe();
 

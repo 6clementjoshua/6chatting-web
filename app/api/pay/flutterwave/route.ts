@@ -15,8 +15,9 @@ function getClientMeta(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        const site = process.env.NEXT_PUBLIC_SITE_URL;
-        if (!site) return NextResponse.json({ error: "Missing NEXT_PUBLIC_SITE_URL" }, { status: 500 });
+        const site = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL;
+        if (!site) return NextResponse.json({ error: "Missing SITE_URL" }, { status: 500 });
+
 
         const flwKey = process.env.FLW_SECRET_KEY;
         if (!flwKey) return NextResponse.json({ error: "Missing FLW_SECRET_KEY" }, { status: 500 });
