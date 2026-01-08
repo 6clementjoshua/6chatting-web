@@ -556,7 +556,7 @@ export default function Page() {
           </div>
         </section>
 
-        {/* ✅ Premium How section — reduced height so it fits without extra scrolling */}
+        {/* ✅ Premium How section — reduced height so it fits without extra scrolling on */}
         <section id="how" className="pt-9 sm:pt-10 scroll-mt-24">
           <FadeIn delayMs={0}>
             <div className="flex flex-col gap-1.5">
