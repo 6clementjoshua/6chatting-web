@@ -727,6 +727,41 @@ export default function Page() {
           </div>
         </section>
 
+        {/* ✅ Support the build (optional, premium) */}
+        <section id="support" className="pt-9 sm:pt-10 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <BevelCard className="p-5 sm:p-7">
+              <div className="grid gap-4 md:grid-cols-[1.2fr_.8fr] md:items-center">
+                <div>
+                  <h2
+                    className="text-[clamp(20px,3.2vw,30px)] font-extrabold tracking-[-0.04em] text-black"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    Support the build (optional)
+                  </h2>
+                  <p className="mt-2 max-w-3xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                    6chatting is building premium real-time translation for text, voice, and calls. If you believe in the
+                    mission, you can become a Founding Supporter to help fund infrastructure, security, and launch readiness.
+                  </p>
+                  <p className="mt-2 text-[12.5px] leading-[1.6] text-neutral-600">
+                    This is optional support and not an investment offer. No equity or ownership is provided through this page.
+                  </p>
+                </div>
+
+                <div className="grid gap-2">
+                  <Button href="/support" ariaLabel="Become a founding supporter" variant="primary" className="w-full">
+                    Become a Founding Supporter
+                  </Button>
+                  <Button href="/support#support-terms" ariaLabel="Read support terms" className="w-full">
+                    Read Support Terms
+                  </Button>
+                </div>
+              </div>
+            </BevelCard>
+          </FadeIn>
+        </section>
+
+
         {/* ✅ Premium How section — reduced height so it fits without extra scrolling on */}
         <section id="how" className="pt-9 sm:pt-10 scroll-mt-24">
           <FadeIn delayMs={0}>
