@@ -15,31 +15,29 @@ function getClientMeta(req: Request) {
 
 export async function POST(req: Request) {
     try {
+        const site = process.env.NEXT_PUBLIC_SITE_URL;
+        if (!site) return NextResponse.json({ error: "Missing NEXT_PUBLIC_SITE_URL" }, { status: 500 });
+
+        const flwKey = process.env.FLW_SECRET_KEY;
+        if (!flwKey) return NextResponse.json({ error: "Missing FLW_SECRET_KEY" }, { status: 500 });
+
         const body = await req.json();
-
-        const currency = String(body.currency || "NGN").toUpperCase(); // Flutterwave strong for NGN
+        const currency = String(body.currency || "NGN").toUpperCase();
         const amountWhole = Number(body.amount);
-
-        const name = body.name ? String(body.name).slice(0, 120) : null;
-        const email = body.email ? String(body.email).slice(0, 180) : null;
-        const note = body.note ? String(body.note).slice(0, 800) : null;
 
         if (!Number.isFinite(amountWhole) || amountWhole <= 0) {
             return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
         }
 
-        // Flutterwave typically expects whole units for NGN (not kobo) in many integrations.
-        // We will store minor units in DB for consistency, but send whole units to Flutterwave.
         const amountMinor = Math.round(amountWhole * 100);
 
-        const site = process.env.NEXT_PUBLIC_SITE_URL!;
-        const flwKey = process.env.FLW_SECRET_KEY!;
-        if (!site || !flwKey) throw new Error("Missing NEXT_PUBLIC_SITE_URL or FLW_SECRET_KEY");
+        const name = body.name ? String(body.name).slice(0, 120) : null;
+        const email = body.email ? String(body.email).slice(0, 180) : null;
+        const note = body.note ? String(body.note).slice(0, 800) : null;
 
         const meta = getClientMeta(req);
         const sb = supabaseAdmin();
 
-        // Create contribution row
         const tx_ref = `support_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 
         const { data: row, error: insErr } = await sb
@@ -60,11 +58,11 @@ export async function POST(req: Request) {
             .select("id")
             .single();
 
-        if (insErr) throw insErr;
+        if (insErr) throw new Error(`Supabase insert failed: ${insErr.message}`);
 
         const payload = {
             tx_ref,
-            amount: amountWhole, // send whole units
+            amount: amountWhole,
             currency,
             redirect_url: `${site}/support/success?provider=flutterwave&tx_ref=${encodeURIComponent(tx_ref)}`,
             customer: {
@@ -76,10 +74,7 @@ export async function POST(req: Request) {
                 description: "Optional contribution to support infrastructure and launch readiness.",
                 logo: `${site}/favicon.ico`,
             },
-            meta: {
-                contribution_id: row.id,
-                supporter_note: note || "",
-            },
+            meta: { contribution_id: row.id },
         };
 
         const res = await fetch("https://api.flutterwave.com/v3/payments", {
@@ -91,11 +86,14 @@ export async function POST(req: Request) {
             body: JSON.stringify(payload),
         });
 
-        const data = await res.json();
+        const data = await res.json().catch(() => null);
 
         if (!res.ok || !data?.data?.link) {
             await sb.from("support_contributions").update({ status: "failed", raw_event: data }).eq("id", row.id);
-            return NextResponse.json({ error: "Failed to initialize Flutterwave payment" }, { status: 500 });
+            return NextResponse.json(
+                { error: data?.message || data?.error || "Failed to initialize Flutterwave payment" },
+                { status: 500 }
+            );
         }
 
         await sb.from("support_contributions").update({ status: "pending" }).eq("id", row.id);
