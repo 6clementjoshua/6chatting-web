@@ -53,6 +53,33 @@ const USE_CASES = [
   },
 ];
 
+const USER_CONTROLS = [
+  {
+    title: "View original + translated text",
+    desc: "See messages clearly with translation context—so both sides understand exactly what was written and what was translated.",
+  },
+  {
+    title: "Change your default language anytime",
+    desc: "Your language choice powers the experience from day one, but you can update it later as your needs change.",
+  },
+  {
+    title: "Control how you communicate",
+    desc: "Type, send voice, or take calls—6chatting is designed to fit natural communication styles across borders.",
+  },
+  {
+    title: "Trusted profiles at a glance",
+    desc: "Verification ticks help you know who you’re talking to—personal, business, or public institutions—before you engage.",
+  },
+];
+
+const CONTROL_PILLS = [
+  "Original text",
+  "Translated text",
+  "Voice messages",
+  "Voice & calls",
+  "Verified profiles",
+];
+
 
 function cx(...parts: Array<string | false | undefined | null>) {
   return parts.filter(Boolean).join(" ");
@@ -589,6 +616,50 @@ export default function Page() {
 
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             {USE_CASES.map((c, idx) => (
+              <FadeIn key={c.title} delayMs={40 + idx * 30}>
+                <BevelCard className="p-4 sm:p-5 h-full">
+                  <div className="flex flex-col gap-2">
+                    <div
+                      className="text-[15px] font-extrabold tracking-[-0.02em] text-black"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      {c.title}
+                    </div>
+                    <p className="text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                      {c.desc}
+                    </p>
+                  </div>
+                </BevelCard>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ✅ What you control (premium clarity, lightweight) */}
+        <section id="what-you-control" className="pt-9 sm:pt-10 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <h2
+              className="text-[clamp(20px,3.2vw,30px)] font-extrabold tracking-[-0.04em] text-black"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              What you control
+            </h2>
+            <p className="mt-2 max-w-3xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+              Premium products feel trustworthy when users understand their controls. 6chatting is designed to keep translation
+              clear, communication natural, and identity signals easy to recognize.
+            </p>
+            <div className="mt-3">
+              <div className="flex flex-wrap gap-2">
+                {CONTROL_PILLS.map((pill) => (
+                  <Pill key={pill}>{pill}</Pill>
+                ))}
+              </div>
+            </div>
+
+          </FadeIn>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {USER_CONTROLS.map((c, idx) => (
               <FadeIn key={c.title} delayMs={40 + idx * 30}>
                 <BevelCard className="p-4 sm:p-5 h-full">
                   <div className="flex flex-col gap-2">
