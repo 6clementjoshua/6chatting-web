@@ -18,6 +18,42 @@ const FEATURE_PILLS = [
   "Personal & Business Premium plans",
 ];
 
+const TRUST_BAR_ITEMS = [
+  { title: "Verified accounts", desc: "Blue / White / Gold / Black ticks clarify identity and category." },
+  { title: "Email confirmation", desc: "Improves trust, reduces spam, and protects the community." },
+  { title: "Real-time translation", desc: "Text + voice + calls designed for natural conversations." },
+  { title: "Cross-border ready", desc: "Built for modern business, travel, and global teams." },
+  { title: "Multi-device", desc: "A consistent experience across phone, tablet, and desktop." },
+];
+
+const USE_CASES = [
+  {
+    title: "Cross-border business",
+    desc: "Close deals, negotiate, and support customers across languages with confidence.",
+  },
+  {
+    title: "Creators & communities",
+    desc: "Engage fans worldwide—your message reaches them in their language instantly.",
+  },
+  {
+    title: "Diaspora families",
+    desc: "Stay connected across countries using the language each person understands best.",
+  },
+  {
+    title: "Customer support teams",
+    desc: "Serve global customers faster with clear, translated conversations.",
+  },
+  {
+    title: "Travel & hospitality",
+    desc: "Communicate with guests, bookings, and local services without friction.",
+  },
+  {
+    title: "Global friendships",
+    desc: "Make real connections globally—language doesn’t limit who you can talk to.",
+  },
+];
+
+
 function cx(...parts: Array<string | false | undefined | null>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -431,6 +467,33 @@ export default function Page() {
           </FadeIn>
         </section>
 
+        {/* ✅ Trust Bar (premium reassurance strip) */}
+        <section className="pt-6 sm:pt-7">
+          <FadeIn delayMs={0}>
+            <BevelCard className="p-4 sm:p-5">
+              <div className="grid gap-3 md:grid-cols-5">
+                {TRUST_BAR_ITEMS.map((item) => (
+                  <div
+                    key={item.title}
+                    className="rounded-2xl border border-black/10 bg-white/95 p-3"
+                  >
+                    <div
+                      className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      {item.title}
+                    </div>
+                    <div className="mt-1 text-[12.5px] leading-[1.55] text-neutral-700">
+                      {item.desc}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </BevelCard>
+          </FadeIn>
+        </section>
+
+
         {/* ✅ After Product Preview: Know your users */}
         <section id="know-your-users" className="pt-9 sm:pt-10 scroll-mt-24">
           <FadeIn delayMs={0}>
@@ -508,6 +571,43 @@ export default function Page() {
             </FadeIn>
           </div>
         </section>
+
+        {/* ✅ Use cases (who it's for) */}
+        <section id="use-cases" className="pt-9 sm:pt-10 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <h2
+              className="text-[clamp(20px,3.2vw,30px)] font-extrabold tracking-[-0.04em] text-black"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Built for real-world conversations
+            </h2>
+            <p className="mt-2 max-w-3xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+              6chatting is designed for people who communicate across borders—business, family, support, travel, and community.
+              These use cases show exactly where translation becomes a daily advantage.
+            </p>
+          </FadeIn>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            {USE_CASES.map((c, idx) => (
+              <FadeIn key={c.title} delayMs={40 + idx * 30}>
+                <BevelCard className="p-4 sm:p-5 h-full">
+                  <div className="flex flex-col gap-2">
+                    <div
+                      className="text-[15px] font-extrabold tracking-[-0.02em] text-black"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      {c.title}
+                    </div>
+                    <p className="text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                      {c.desc}
+                    </p>
+                  </div>
+                </BevelCard>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
 
         {/* ✅ Remaining images */}
         <section id="more-translation" className="pt-9 sm:pt-10 scroll-mt-24">
@@ -658,6 +758,47 @@ export default function Page() {
             </BevelCard>
           </div>
         </section>
+
+        {/* ✅ Final CTA (premium close) */}
+        <section className="pt-10 sm:pt-12">
+          <FadeIn delayMs={0}>
+            <BevelCard className="p-5 sm:p-7">
+              <div className="grid gap-4 md:grid-cols-[1.1fr_.9fr] md:items-center">
+                <div>
+                  <h2
+                    className="text-[clamp(20px,3.2vw,30px)] font-extrabold tracking-[-0.04em] text-black"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    Ready to communicate without language barriers?
+                  </h2>
+                  <p className="mt-2 max-w-xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                    Join the waitlist to be first to download 6chatting. Built to feel fast, clean, and premium across devices.
+                  </p>
+                </div>
+
+                <div className="grid gap-2">
+                  <Button
+                    variant="primary"
+                    onClick={() => setWaitlistOpen(true)}
+                    className="w-full"
+                    ariaLabel="Download now"
+                  >
+                    Download Now
+                  </Button>
+                  <Button
+                    href="#how"
+                    onClick={() => scrollToId("how")}
+                    className="w-full"
+                    ariaLabel="See how it works"
+                  >
+                    How it works
+                  </Button>
+                </div>
+              </div>
+            </BevelCard>
+          </FadeIn>
+        </section>
+
 
         <footer className="pt-10 text-neutral-700">
           <div className="border-t border-black/10 pt-6">
