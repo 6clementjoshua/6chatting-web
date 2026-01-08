@@ -4,9 +4,12 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const runtime = "nodejs";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2025-12-15.clover",
-});
+function getStripe() {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error("Missing STRIPE_SECRET_KEY");
+    return new Stripe(key, { apiVersion: "2025-12-15.clover" as any });
+
+}
 
 function getClientMeta(req: Request) {
     const ip =
@@ -18,39 +21,35 @@ function getClientMeta(req: Request) {
     return { ip, country, ua };
 }
 
+function toMinor(cur: string, whole: number) {
+    // Handle common 2-decimal currencies. Add special cases later if needed.
+    return Math.round(whole * 100);
+}
+
 export async function POST(req: Request) {
     try {
+        const stripe = getStripe();
+
+        const site = process.env.NEXT_PUBLIC_SITE_URL;
+        if (!site) return NextResponse.json({ error: "Missing NEXT_PUBLIC_SITE_URL" }, { status: 500 });
+
         const body = await req.json();
 
         const currency = String(body.currency || "USD").toUpperCase();
-        const amount = Number(body.amount);
+        const amountWhole = Number(body.amount);
+
         const name = body.name ? String(body.name).slice(0, 120) : null;
         const email = body.email ? String(body.email).slice(0, 180) : null;
         const note = body.note ? String(body.note).slice(0, 800) : null;
 
-        // Minimal validation
-        if (!Number.isFinite(amount) || amount <= 0) {
+        if (!Number.isFinite(amountWhole) || amountWhole <= 0) {
             return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
         }
 
-        // IMPORTANT:
-        // Stripe expects "minor units" (cents) for most currencies.
-        // Your UI currently sends whole numbers (e.g., 25 USD).
-        // We'll treat USD/NGN as whole units and convert to minor units here:
-        const toMinor = (cur: string, whole: number) => {
-            // Most currencies: 2 decimals.
-            // If you later add zero-decimal currencies, handle them explicitly.
-            return Math.round(whole * 100);
-        };
-
-        const amountMinor = toMinor(currency, amount);
-
-        const site = process.env.NEXT_PUBLIC_SITE_URL!;
-        if (!site) throw new Error("Missing NEXT_PUBLIC_SITE_URL");
-
+        const amountMinor = toMinor(currency, amountWhole);
         const meta = getClientMeta(req);
 
-        // Create DB record (initiated)
+        // Create DB record first
         const sb = supabaseAdmin();
         const { data: row, error: insErr } = await sb
             .from("support_contributions")
@@ -71,7 +70,6 @@ export async function POST(req: Request) {
 
         if (insErr) throw insErr;
 
-        // Stripe Checkout Session
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
             submit_type: "donate",
@@ -95,10 +93,8 @@ export async function POST(req: Request) {
                     },
                 },
             ],
-            // You can add additional payment method options by enabling them in Stripe Dashboard.
         });
 
-        // Update record with session id
         await sb
             .from("support_contributions")
             .update({
