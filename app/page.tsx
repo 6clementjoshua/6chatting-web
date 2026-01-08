@@ -103,7 +103,7 @@ function FeatureCard({
   imageSrc,
   imageAlt,
   learnMoreLabel = "Learn more",
-  onLearnMore,
+  learnMoreHref,
   hideLearnMore = false,
   imageBoxClassName = "",
   imageSizes = "(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 560px",
@@ -114,7 +114,7 @@ function FeatureCard({
   imageSrc: string;
   imageAlt: string;
   learnMoreLabel?: string;
-  onLearnMore?: () => void;
+  learnMoreHref?: string; // ✅ NEW: route to another page
   hideLearnMore?: boolean;
   imageBoxClassName?: string;
   imageSizes?: string;
@@ -146,7 +146,11 @@ function FeatureCard({
 
           {!hideLearnMore ? (
             <div className="pt-1">
-              <Button onClick={onLearnMore} ariaLabel={learnMoreLabel} className="w-full sm:w-fit">
+              <Button
+                href={learnMoreHref || "/"}
+                ariaLabel={learnMoreLabel}
+                className="w-full sm:w-fit"
+              >
                 {learnMoreLabel}
               </Button>
             </div>
@@ -172,15 +176,8 @@ export default function Page() {
       {/* ✅ Header removed: now handled globally in app/layout.tsx via <Header /> */}
 
       <main
-        className={cx(
-          "mx-auto w-[min(1120px,calc(100%-24px))] pb-12",
-          // ✅ Reduced: bring the first hero close to the fixed header (almost “kissing”)
-          "pt-16 sm:pt-18 md:pt-20"
-        )}
-        // Tailwind doesn’t have pt-18 by default; keep this inline for exact control
-        style={{
-          paddingTop: "calc(var(--header-h, 64px) + 2px)",
-        }}
+        className={cx("mx-auto w-[min(1120px,calc(100%-24px))] pb-12", "pt-16 sm:pt-18 md:pt-20")}
+        style={{ paddingTop: "calc(var(--header-h, 64px) + 2px)" }}
       >
         {/* ✅ FIRST AFTER HEADER: Multi-device hero (must never crop) */}
         <section className="-mt-2 sm:-mt-3">
@@ -205,14 +202,15 @@ export default function Page() {
                   Connect. Translate. Communicate.
                 </h2>
                 <p className="mt-2 text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
-                  A premium translation chat experience across phone, tablet, and desktop — built for modern global conversations.
+                  A premium translation chat experience across phone, tablet, and desktop — built for modern global
+                  conversations.
                 </p>
               </div>
             </BevelCard>
           </FadeIn>
         </section>
 
-        {/* ✅ Global languages hero card */}
+        {/* ✅ Global languages hero card (Learn more now goes to its own page) */}
         <section className="pt-5 sm:pt-6">
           <FadeIn delayMs={40}>
             <BevelCard className="p-5 sm:p-7">
@@ -235,12 +233,12 @@ export default function Page() {
                     Global language support
                   </h3>
                   <p className="text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
-                    See the languages 6chatting supports and how real-time translation works across regions — designed to keep
-                    conversations natural, accurate, and instant.
+                    See the languages 6chatting supports and how real-time translation works across regions — designed to
+                    keep conversations natural, accurate, and instant.
                   </p>
 
                   <div className="pt-1">
-                    <Button onClick={() => scrollToId("global-languages-details")} ariaLabel="Learn more about language support">
+                    <Button href="/learn/languages" ariaLabel="Learn more about language support">
                       Learn more
                     </Button>
                   </div>
@@ -266,8 +264,8 @@ export default function Page() {
               </h1>
 
               <p className="mt-3 max-w-xl text-[15px] sm:text-[15.5px] font-normal leading-[1.75] text-neutral-700">
-                6chatting removes language barriers for business, friendship, and global connection. Choose your language at sign-up —
-                conversations are delivered in the receiver’s language instantly.
+                6chatting removes language barriers for business, friendship, and global connection. Choose your language
+                at sign-up — conversations are delivered in the receiver’s language instantly.
               </p>
 
               <div id="download" className="mt-6 grid gap-2">
@@ -297,8 +295,7 @@ export default function Page() {
           </FadeIn>
         </section>
 
-
-        {/* Know your users + rest unchanged... */}
+        {/* ✅ After Product Preview: Know your users (Learn more -> its own page) */}
         <section id="know-your-users" className="pt-9 sm:pt-10 scroll-mt-24">
           <FadeIn delayMs={0}>
             <h2
@@ -308,8 +305,8 @@ export default function Page() {
               Know your users
             </h2>
             <p className="mt-2 max-w-3xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
-              Verification helps people trust who they are chatting with. Ticks clearly indicate account type and verification level —
-              so users can communicate with confidence.
+              Verification helps people trust who they are chatting with. Ticks clearly indicate account type and verification
+              level — so users can communicate with confidence.
             </p>
           </FadeIn>
 
@@ -322,7 +319,7 @@ export default function Page() {
                   summary="Blue tick confirms an individual identity. Best for creators, professionals, and everyday users who want trusted interactions."
                   imageSrc="/images/verify-personal-blue.png"
                   imageAlt="Personal verification blue tick on profile screen"
-                  onLearnMore={() => scrollToId("verify-details")}
+                  learnMoreHref="/learn/verification/personal"
                   imageBoxClassName="h-[190px] sm:h-[210px]"
                   imageSizes="(max-width: 640px) 92vw, (max-width: 1024px) 44vw, 520px"
                 />
@@ -337,7 +334,7 @@ export default function Page() {
                   summary="White tick is for verified businesses. Ideal for brands that need a credible presence and professional customer conversations."
                   imageSrc="/images/verify-business-white.png"
                   imageAlt="Business verification white tick on profile screen"
-                  onLearnMore={() => scrollToId("verify-details")}
+                  learnMoreHref="/learn/verification/business-white"
                   imageBoxClassName="h-[190px] sm:h-[210px]"
                   imageSizes="(max-width: 640px) 92vw, (max-width: 1024px) 44vw, 520px"
                 />
@@ -352,7 +349,7 @@ export default function Page() {
                   summary="Gold tick is premium business verification. Built for higher-trust commerce, partnerships, and cross-border communication."
                   imageSrc="/images/verify-business-gold.png"
                   imageAlt="Business verification gold tick on profile screen"
-                  onLearnMore={() => scrollToId("verify-details")}
+                  learnMoreHref="/learn/verification/business-gold"
                   imageBoxClassName="h-[190px] sm:h-[210px]"
                   imageSizes="(max-width: 640px) 92vw, (max-width: 1024px) 44vw, 520px"
                 />
@@ -367,17 +364,16 @@ export default function Page() {
                   summary="Black tick is reserved for verified government/public institutions. Enhanced requirements apply and additional fields may be requested."
                   imageSrc="/images/verify-government-black.png"
                   imageAlt="Government verification black tick on profile screen"
-                  onLearnMore={() => scrollToId("verify-details")}
+                  learnMoreHref="/learn/verification-government"
                   imageBoxClassName="h-[190px] sm:h-[210px]"
                   imageSizes="(max-width: 640px) 92vw, (max-width: 1024px) 44vw, 520px"
                 />
               </div>
             </FadeIn>
           </div>
-
-          
         </section>
 
+        {/* ✅ Remaining images (Learn more -> their own pages) */}
         <section id="more-translation" className="pt-9 sm:pt-10 scroll-mt-24">
           <FadeIn delayMs={0}>
             <h2
@@ -400,7 +396,7 @@ export default function Page() {
                   summary="Speak normally and let 6chatting translate in real-time. Perfect for meetings, travel, sales calls, and international teams."
                   imageSrc="/images/voice-translation-devices.png"
                   imageAlt="Voice translation on mobile and laptop devices"
-                  onLearnMore={() => scrollToId("translation-details")}
+                  learnMoreHref="/learn/voice-calls"
                   imageBoxClassName="h-[210px] sm:h-[240px]"
                   imageSizes="(max-width: 640px) 92vw, (max-width: 1024px) 44vw, 520px"
                 />
@@ -415,26 +411,23 @@ export default function Page() {
                   summary="Messages display clearly with translation status, so both sides understand what was sent and what was translated."
                   imageSrc="/images/text-translation-dual.png"
                   imageAlt="Two phones showing text translated from English to Chinese"
-                  onLearnMore={() => scrollToId("translation-details")}
+                  learnMoreHref="/learn/text-bubbles"
                   imageBoxClassName="h-[210px] sm:h-[240px]"
                   imageSizes="(max-width: 640px) 92vw, (max-width: 1024px) 44vw, 520px"
                 />
               </div>
             </FadeIn>
           </div>
-
-          
         </section>
 
+        {/* Existing How section stays */}
         <section id="how" className="pt-9 sm:pt-10 scroll-mt-24">
           <FadeIn delayMs={0}>
             <h2 className="text-lg font-bold tracking-[-0.02em] text-black" style={{ fontFamily: "var(--font-display)" }}>
               How 6chatting works
             </h2>
           </FadeIn>
-
-          {/* Keep the rest of your sections exactly as they are below */}
-          {/* ... */}
+          {/* ... keep your existing How content ... */}
         </section>
 
         <footer className="pt-10 text-neutral-700">
