@@ -168,15 +168,6 @@ export default function SupportPage() {
         }
     }
 
-    // Premium preset button styles
-    const presetBtnBase =
-        "support-amt-btn relative w-full rounded-2xl border px-3 py-3 text-left transition-all duration-200";
-    const presetBtnInner =
-        "flex items-center justify-between gap-3";
-    const presetLabel =
-        "text-[12.5px] font-semibold text-neutral-600";
-    const presetValue =
-        "text-[15px] sm:text-[15.5px] font-extrabold tracking-[-0.02em] text-black";
 
     return (
         <div
@@ -279,8 +270,8 @@ export default function SupportPage() {
                                 </span>
                             </div>
 
-                            {/* Presets: premium + glow when selected */}
-                            <div className="mt-4 grid gap-2 sm:grid-cols-5">
+                            {/* Presets: premium + never-squeeze layout */}
+                            <div className="mt-4 grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
                                 {presets.map((amt) => {
                                     const active = customAmount.trim() === "" && presetAmount === amt;
                                     return (
@@ -293,18 +284,23 @@ export default function SupportPage() {
                                                 setError("");
                                             }}
                                             className={cx(
-                                                presetBtnBase,
-                                                active
-                                                    ? "border-black/25 bg-white"
-                                                    : "border-black/10 bg-white hover:border-black/20"
+                                                "support-amt-btn",
+                                                "relative w-full rounded-2xl border px-3 py-3 text-center transition-all duration-200",
+                                                "min-h-[58px]",
+                                                active ? "border-black/25" : "border-black/10 hover:border-black/20"
                                             )}
                                             aria-pressed={active}
                                             aria-label={`Select ${formatMoney(amt, currency)}`}
                                         >
                                             <div className={cx("support-amt-glow", active && "support-amt-glow--on")} />
-                                            <div className={presetBtnInner}>
-                                                <div className={presetLabel}>Preset</div>
-                                                <div className={cx(presetValue)} style={{ fontFamily: "var(--font-display)" }}>
+
+                                            <div className="flex flex-col items-center justify-center gap-1">
+                                                <div className="text-[11.5px] font-semibold text-neutral-600 leading-none">Preset</div>
+
+                                                <div
+                                                    className="support-amt-value text-[15px] sm:text-[16px] font-extrabold tracking-[-0.02em] text-black leading-none"
+                                                    style={{ fontFamily: "var(--font-display)" }}
+                                                >
                                                     {formatMoney(amt, currency)}
                                                 </div>
                                             </div>
@@ -605,6 +601,11 @@ export default function SupportPage() {
             box-shadow: 10px 10px 22px rgba(0, 0, 0, 0.08), -10px -10px 22px rgba(255, 255, 255, 0.9);
             overflow: hidden;
           }
+
+          .support-amt-value {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
 
           .support-amt-btn:hover {
             transform: translateY(-1px);
