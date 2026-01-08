@@ -154,10 +154,15 @@ function TickCard({
 
 export default function VerificationLearnPage() {
     return (
-        <main className="mx-auto w-[min(1120px,calc(100%-24px))] pb-16 pt-[calc(var(--header-h,64px)+18px)]">
-            {/* HERO */}
-            <section className="grid gap-4 md:grid-cols-[1.1fr_.9fr] md:items-center">
-                <BevelCard className="p-5 sm:p-7">
+        <main
+            className="mx-auto w-[min(1120px,calc(100%-24px))] pb-16"
+            // ✅ match the “top kissing header” behavior you used elsewhere
+            style={{ paddingTop: "calc(var(--header-h, 64px) + 2px)" }}
+        >
+            {/* ✅ HERO (balanced) */}
+            <section className="grid gap-4 md:grid-cols-2 md:items-stretch">
+                {/* Left hero card: stretch to match height */}
+                <BevelCard className="p-5 sm:p-7 h-full">
                     <Badge>Know your users</Badge>
 
                     <h1
@@ -168,9 +173,8 @@ export default function VerificationLearnPage() {
                     </h1>
 
                     <p className="mt-3 max-w-2xl text-[14.5px] sm:text-[15px] leading-[1.8] text-neutral-700">
-                        6chatting uses verification ticks to help users quickly understand who they are chatting with. The goal is
-                        simple: reduce impersonation, increase credibility, and make conversations safer — especially for business
-                        and cross-border communication.
+                        6chatting uses verification ticks to help users quickly understand who they are chatting with. The goal is simple: reduce
+                        impersonation, increase credibility, and make conversations safer — especially for business and cross-border communication.
                     </p>
 
                     <div className="mt-5 flex flex-col gap-2 sm:flex-row">
@@ -183,43 +187,62 @@ export default function VerificationLearnPage() {
                     </div>
                 </BevelCard>
 
-                <BevelCard className="p-5 sm:p-7">
-                    <SectionTitle
-                        title="Quick guide"
-                        desc="Each tick represents a verified category. Blue is personal. White & Gold are business. Black is government/public institutions."
-                    />
-                    <div className="mt-5 grid gap-3">
-                        <div className="rounded-2xl border border-black/10 bg-white p-4">
-                            <div className="text-sm font-extrabold text-black" style={{ fontFamily: "var(--font-display)" }}>
-                                Blue tick — Personal
+                {/* Right hero card: flex column so content sits properly + fills height */}
+                <BevelCard className="p-5 sm:p-7 h-full">
+                    <div className="flex h-full flex-col">
+                        <SectionTitle
+                            title="Quick guide"
+                            desc="Each tick represents a verified category. Blue is personal. White & Gold are business. Black is government/public institutions."
+                        />
+
+                        <div className="mt-5 grid gap-3">
+                            <div className="rounded-2xl border border-black/10 bg-white p-4">
+                                <div className="text-sm font-extrabold text-black" style={{ fontFamily: "var(--font-display)" }}>
+                                    Blue tick — Personal
+                                </div>
+                                <p className="mt-1 text-[13.8px] leading-[1.75] text-neutral-700">
+                                    Verified individual identity. Best for everyday users, creators, and professionals.
+                                </p>
                             </div>
-                            <p className="mt-1 text-[13.8px] leading-[1.75] text-neutral-700">
-                                Verified individual identity. Best for everyday users, creators, and professionals.
-                            </p>
+
+                            <div className="rounded-2xl border border-black/10 bg-white p-4">
+                                <div className="text-sm font-extrabold text-black" style={{ fontFamily: "var(--font-display)" }}>
+                                    White tick — Business
+                                </div>
+                                <p className="mt-1 text-[13.8px] leading-[1.75] text-neutral-700">
+                                    Verified business account. Best for brands, shops, SMEs, and customer-facing teams.
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-black/10 bg-white p-4">
+                                <div className="text-sm font-extrabold text-black" style={{ fontFamily: "var(--font-display)" }}>
+                                    Gold tick — Business Premium
+                                </div>
+                                <p className="mt-1 text-[13.8px] leading-[1.75] text-neutral-700">
+                                    Higher-trust business verification for partnerships, payments, and international credibility.
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-black/10 bg-white p-4">
+                                <div className="text-sm font-extrabold text-black" style={{ fontFamily: "var(--font-display)" }}>
+                                    Black tick — Government
+                                </div>
+                                <p className="mt-1 text-[13.8px] leading-[1.75] text-neutral-700">
+                                    Reserved for verified government/public institutions with enhanced requirements and review.
+                                </p>
+                            </div>
                         </div>
-                        <div className="rounded-2xl border border-black/10 bg-white p-4">
-                            <div className="text-sm font-extrabold text-black" style={{ fontFamily: "var(--font-display)" }}>
-                                White tick — Business
+
+                        {/* Optional: keeps the card feeling “finished” and balanced at the bottom */}
+                        <div className="mt-auto pt-5">
+                            <div className="rounded-2xl border border-black/10 bg-white p-4">
+                                <div className="text-sm font-extrabold text-black" style={{ fontFamily: "var(--font-display)" }}>
+                                    Tip
+                                </div>
+                                <p className="mt-2 text-[13.8px] leading-[1.75] text-neutral-700">
+                                    On 6chatting, the tick is shown consistently across devices, so trust signals remain clear in every conversation.
+                                </p>
                             </div>
-                            <p className="mt-1 text-[13.8px] leading-[1.75] text-neutral-700">
-                                Verified business account. Best for brands, shops, SMEs, and customer-facing teams.
-                            </p>
-                        </div>
-                        <div className="rounded-2xl border border-black/10 bg-white p-4">
-                            <div className="text-sm font-extrabold text-black" style={{ fontFamily: "var(--font-display)" }}>
-                                Gold tick — Business Premium
-                            </div>
-                            <p className="mt-1 text-[13.8px] leading-[1.75] text-neutral-700">
-                                Higher-trust business verification for partnerships, payments, and international credibility.
-                            </p>
-                        </div>
-                        <div className="rounded-2xl border border-black/10 bg-white p-4">
-                            <div className="text-sm font-extrabold text-black" style={{ fontFamily: "var(--font-display)" }}>
-                                Black tick — Government
-                            </div>
-                            <p className="mt-1 text-[13.8px] leading-[1.75] text-neutral-700">
-                                Reserved for verified government/public institutions with enhanced requirements and review.
-                            </p>
                         </div>
                     </div>
                 </BevelCard>
@@ -390,9 +413,9 @@ export default function VerificationLearnPage() {
                                 Step 1 — Choose a verification category
                             </div>
                             <p className="mt-2 text-[13.8px] leading-[1.75] text-neutral-700">
-                                Users select: <span className="font-semibold">Personal</span>, <span className="font-semibold">Business (White)</span>,{" "}
-                                <span className="font-semibold">Business (Gold)</span>, or <span className="font-semibold">Government (Black)</span>.
-                                The form updates based on the category selected.
+                                Users select: <span className="font-semibold">Personal</span>,{" "}
+                                <span className="font-semibold">Business (White)</span>, <span className="font-semibold">Business (Gold)</span>, or{" "}
+                                <span className="font-semibold">Government (Black)</span>. The form updates based on the category selected.
                             </p>
                         </div>
 
@@ -401,8 +424,8 @@ export default function VerificationLearnPage() {
                                 Step 2 — Submit documents and required details
                             </div>
                             <p className="mt-2 text-[13.8px] leading-[1.75] text-neutral-700">
-                                Documents must be clear, valid, and consistent with the profile. Business and Government categories require additional proof
-                                that the applicant is authorized to represent the entity.
+                                Documents must be clear, valid, and consistent with the profile. Business and Government categories require additional
+                                proof that the applicant is authorized to represent the entity.
                             </p>
                         </div>
 
@@ -411,8 +434,8 @@ export default function VerificationLearnPage() {
                                 Step 3 — Review and decision
                             </div>
                             <p className="mt-2 text-[13.8px] leading-[1.75] text-neutral-700">
-                                Applications are reviewed for authenticity, consistency, and category fit. If something is missing, the user can be asked to
-                                resubmit with corrections.
+                                Applications are reviewed for authenticity, consistency, and category fit. If something is missing, the user can be asked
+                                to resubmit with corrections.
                             </p>
                         </div>
 
@@ -432,8 +455,8 @@ export default function VerificationLearnPage() {
                             Important note
                         </div>
                         <p className="mt-2 text-[13.8px] leading-[1.75] text-neutral-700">
-                            Verification is a trust feature. Misrepresentation, forged documents, or impersonation attempts can lead to rejection and enforcement actions
-                            under 6chatting policies.
+                            Verification is a trust feature. Misrepresentation, forged documents, or impersonation attempts can lead to rejection and
+                            enforcement actions under 6chatting policies.
                         </p>
                     </div>
                 </BevelCard>
