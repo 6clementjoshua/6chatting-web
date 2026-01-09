@@ -80,6 +80,74 @@ const CONTROL_PILLS = [
   "Verified profiles",
 ];
 
+const NAV_EXPLAIN = [
+  {
+    key: "home",
+    title: "Home",
+    imageSrc: "/images/nav/nav-home-focus.png",
+    imageAlt: "Home icon highlighted on 6chatting navigation",
+    summary:
+      "Your translated world feed. Home is where you see posts, updates, and community interactions—automatically translated into your preferred language so you can explore and engage globally without friction.",
+    bullets: [
+      "Browse feeds, posts, and community activity in your language",
+      "Interact globally—comments and content flow across languages",
+      "Your primary discovery and engagement hub in 6chatting",
+    ],
+  },
+  {
+    key: "calls",
+    title: "Calls",
+    imageSrc: "/images/nav/nav-calls-focus.png",
+    imageAlt: "Calls icon highlighted on 6chatting navigation",
+    summary:
+      "Your call history and calling hub. Calls shows your recent, missed, and ongoing call activity—designed for clear voice/video communication across borders.",
+    bullets: [
+      "View recent and missed calls in one place",
+      "Start voice/video communication quickly",
+      "Built for personal and professional conversations",
+    ],
+  },
+  {
+    key: "chats",
+    title: "Chats",
+    imageSrc: "/images/nav/nav-chats-focus.png",
+    imageAlt: "Chats icon highlighted on 6chatting navigation",
+    summary:
+      "Your private conversations—translated instantly. Chats is where your 1:1 and group messages live, keeping communication natural even when languages differ.",
+    bullets: [
+      "Instant messaging with translation support",
+      "Find ongoing and previous conversations fast",
+      "Share messages and content without language limits",
+    ],
+  },
+  {
+    key: "post",
+    title: "Post",
+    imageSrc: "/images/nav/nav-post-focus.png",
+    imageAlt: "Post icon highlighted on 6chatting navigation",
+    summary:
+      "Create and share content. Post is where you publish updates and media—your content can reach wider audiences because translation makes it understandable across languages.",
+    bullets: [
+      "Upload audio and video (live or file)",
+      "Share PDFs and documents",
+      "Publish updates for community or business visibility",
+    ],
+  },
+  {
+    key: "profile",
+    title: "Profile",
+    imageSrc: "/images/nav/nav-profile-focus.png",
+    imageAlt: "Profile icon highlighted on 6chatting navigation",
+    summary:
+      "Your account and identity settings. Profile is where you manage your presence—personal accounts keep it simple, while business accounts unlock advanced suites and expanded capabilities.",
+    bullets: [
+      "Edit profile details, preferences, and visibility",
+      "Personal = essential features; Business = expanded tools",
+      "Manage identity signals, settings, and account controls",
+    ],
+  },
+];
+
 
 function cx(...parts: Array<string | false | undefined | null>) {
   return parts.filter(Boolean).join(" ");
@@ -680,6 +748,80 @@ export default function Page() {
         </section>
 
 
+        {/* ✅ Navigation explanation (5 icons, premium + cardless) */}
+        <section id="navigation" className="pt-10 sm:pt-12 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <div className="flex flex-col gap-2">
+              <h2
+                className="text-[clamp(20px,3.2vw,30px)] font-extrabold tracking-[-0.04em] text-black"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Navigation
+              </h2>
+              <p className="max-w-3xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                A clear guide to what each icon does—so users instantly understand how to explore, communicate, and create on
+                6chatting.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-5 grid gap-5 sm:gap-6">
+            {NAV_EXPLAIN.map((item, idx) => {
+              const flip = idx % 2 === 1;
+
+              return (
+                <FadeIn key={item.key} delayMs={40 + idx * 40}>
+                  <div
+                    className={cx(
+                      "nav-row",
+                      flip ? "md:nav-row--flip" : ""
+                    )}
+                  >
+                    {/* Image */}
+                    <div className="nav-media">
+                      <div className="nav-glass">
+                        <div className="nav-img-wrap">
+                          <Image
+                            src={item.imageSrc}
+                            alt={item.imageAlt}
+                            fill
+                            className="nav-img object-contain"
+                            sizes="(max-width: 768px) 92vw, (max-width: 1200px) 46vw, 520px"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Text */}
+                    <div className="nav-text">
+                      <div className="nav-kicker">
+                        <Pill className="!bg-white">{item.title}</Pill>
+                      </div>
+
+                      <p className="mt-3 text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                        {item.summary}
+                      </p>
+
+                      <ul className="mt-3 nav-list">
+                        {item.bullets.map((b) => (
+                          <li key={b} className="nav-li">
+                            <span className="nav-dot" />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Divider line (cardless structure) */}
+                  {idx !== NAV_EXPLAIN.length - 1 ? <div className="nav-divider" /> : null}
+                </FadeIn>
+              );
+            })}
+          </div>
+        </section>
+
+
         {/* ✅ Remaining images */}
         <section id="more-translation" className="pt-9 sm:pt-10 scroll-mt-24">
           <FadeIn delayMs={0}>
@@ -1083,6 +1225,112 @@ export default function Page() {
           .how-arrow-right {
             right: -8px;
           }
+            /* ✅ Navigation (cardless + premium glass) */
+.nav-row {
+  display: grid;
+  gap: 14px;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .nav-row {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 20px;
+  }
+  .nav-row--flip {
+    grid-template-columns: 0.95fr 1.05fr;
+  }
+  .nav-row--flip .nav-media {
+    order: 2;
+  }
+  .nav-row--flip .nav-text {
+    order: 1;
+  }
+}
+
+.nav-glass {
+  border-radius: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    14px 14px 28px rgba(0, 0, 0, 0.10),
+    -14px -14px 28px rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+}
+
+.nav-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 240px;
+}
+
+@media (min-width: 640px) {
+  .nav-img-wrap {
+    height: 280px;
+  }
+}
+
+.nav-img {
+  transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 320ms ease;
+  will-change: transform;
+}
+
+.nav-glass:hover .nav-img {
+  transform: scale(1.02);
+  filter: contrast(1.02);
+}
+
+.nav-text {
+  padding: 4px 2px;
+}
+
+.nav-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.nav-li {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 10px;
+  align-items: start;
+  color: rgba(64, 64, 64, 1);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.nav-dot {
+  margin-top: 8px;
+  height: 6px;
+  width: 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.10);
+}
+
+.nav-divider {
+  height: 1px;
+  width: 100%;
+  margin-top: 6px;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.04),
+    rgba(0,0,0,0.12),
+    rgba(0,0,0,0.04)
+  );
+}
+
         `}</style>
       </main>
     </div>
