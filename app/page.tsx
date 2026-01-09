@@ -1499,9 +1499,10 @@ export default function Page() {
 }
 .stories-row {
   display: grid;
-  gap: 14px;
+  gap: 10px; /* tighter vertical rhythm */
   align-items: center;
 }
+
 @media (min-width: 768px) {
   .stories-row {
     grid-template-columns: 1.05fr 0.95fr;
