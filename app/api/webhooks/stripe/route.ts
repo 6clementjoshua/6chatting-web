@@ -64,6 +64,24 @@ export async function POST(req: Request) {
                     raw_event: event as any,
                 })
                 .eq("id", contributionId);
+
+            // ✅ If supporter opted-in, publish to Founding Supporters list (public read table)
+            const { data: contrib, error: contribErr } = await sb
+                .from("support_contributions")
+                .select("id, recognize, display_name, amount, currency, provider")
+                .eq("id", contributionId)
+                .single();
+
+            if (!contribErr && contrib?.recognize && contrib?.display_name) {
+                await sb.from("founding_supporters").upsert({
+                    contribution_id: contrib.id,
+                    display_name: contrib.display_name,
+                    amount: contrib.amount,
+                    currency: contrib.currency,
+                    provider: contrib.provider,
+                });
+            }
+
         }
 
         return NextResponse.json({ received: true });

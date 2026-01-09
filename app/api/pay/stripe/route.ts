@@ -57,6 +57,10 @@ export async function POST(req: Request) {
         console.log("[stripe] supabase admin ok");
 
         console.log("[stripe] inserting support_contributions");
+        const recognize = Boolean(body.recognize);
+        const displayNameRaw = body.displayName ? String(body.displayName).slice(0, 40) : "";
+        const displayName = recognize ? (displayNameRaw.trim() || "Anonymous") : null;
+
         const { data: row, error: insErr } = await sb
             .from("support_contributions")
             .insert({
@@ -70,9 +74,14 @@ export async function POST(req: Request) {
                 country: meta.country,
                 ip: meta.ip,
                 user_agent: meta.ua,
+
+                // ✅ NEW
+                recognize,
+                display_name: displayName,
             })
             .select("id")
             .single();
+
 
         if (insErr) throw new Error(`Supabase insert failed: ${insErr.message}`);
 

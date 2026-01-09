@@ -54,6 +54,26 @@ export async function POST(req: Request) {
                     raw_event: body,
                 })
                 .eq("provider_tx_ref", txRef);
+
+            // ✅ If succeeded and opted-in, publish to Founding Supporters list
+            if (newStatus === "succeeded") {
+                const { data: contrib, error: contribErr } = await sb
+                    .from("support_contributions")
+                    .select("id, recognize, display_name, amount, currency, provider")
+                    .eq("provider_tx_ref", txRef)
+                    .single();
+
+                if (!contribErr && contrib?.recognize && contrib?.display_name) {
+                    await sb.from("founding_supporters").upsert({
+                        contribution_id: contrib.id,
+                        display_name: contrib.display_name,
+                        amount: contrib.amount,
+                        currency: contrib.currency,
+                        provider: contrib.provider,
+                    });
+                }
+            }
+
         }
 
         return NextResponse.json({ ok: true });
