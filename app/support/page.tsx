@@ -104,6 +104,11 @@ export default function SupportPage() {
     const [supporterEmail, setSupporterEmail] = useState<string>("");
     const [note, setNote] = useState<string>("");
 
+    // ✅ Founding Supporter recognition (optional)
+    const [recognize, setRecognize] = useState<boolean>(false);
+    const [displayName, setDisplayName] = useState<string>("Anonymous");
+
+
     const [paying, setPaying] = useState<null | "stripe" | "flutterwave">(null);
     const [error, setError] = useState<string>("");
 
@@ -122,8 +127,14 @@ export default function SupportPage() {
         name: supporterName.trim() || undefined,
         email: supporterEmail.trim() || undefined,
         note: note.trim() || undefined,
+
+        // ✅ recognition
+        recognize,
+        displayName: recognize ? (displayName.trim() || "Anonymous") : undefined,
+
         source: "support_page",
     };
+
 
     async function postAndRedirect(path: string, provider: "stripe" | "flutterwave") {
         setError("");
@@ -345,25 +356,51 @@ export default function SupportPage() {
                             </div>
 
                             {/* Name/email */}
-                            <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                                <div className="rounded-2xl border border-black/10 bg-white p-3">
-                                    <label className="text-xs font-bold text-neutral-700">Your name (optional)</label>
+                            {/* ✅ Founding Supporter recognition */}
+                            <div className="mt-2 rounded-2xl border border-black/10 bg-white p-3">
+                                <label className="flex items-start gap-3">
                                     <input
-                                        value={supporterName}
-                                        onChange={(e) => setSupporterName(e.target.value)}
-                                        placeholder="Name"
-                                        className="mt-2 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/20"
+                                        type="checkbox"
+                                        checked={recognize}
+                                        onChange={(e) => {
+                                            const next = e.target.checked;
+                                            setRecognize(next);
+                                            setError("");
+                                            if (next && !displayName.trim()) setDisplayName("Anonymous");
+                                        }}
+                                        className="mt-1 h-4 w-4 rounded border-black/20"
                                     />
-                                </div>
-                                <div className="rounded-2xl border border-black/10 bg-white p-3">
-                                    <label className="text-xs font-bold text-neutral-700">Email for receipt (optional)</label>
-                                    <input
-                                        value={supporterEmail}
-                                        onChange={(e) => setSupporterEmail(e.target.value)}
-                                        placeholder="email@example.com"
-                                        className="mt-2 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/20"
-                                    />
-                                </div>
+
+                                    <span className="flex-1">
+                                        <span
+                                            className="block text-[13px] font-extrabold text-black"
+                                            style={{ fontFamily: "var(--font-display)" }}
+                                        >
+                                            Recognize me as a Founding Supporter (optional)
+                                        </span>
+
+                                        <span className="mt-0.5 block text-[12.5px] leading-[1.6] text-neutral-600">
+                                            If enabled, your display name may appear on a Founding Supporters page after your payment succeeds.
+                                            Default is <span className="font-semibold">Anonymous</span>.
+                                        </span>
+                                    </span>
+                                </label>
+
+                                {recognize ? (
+                                    <div className="mt-3 rounded-2xl border border-black/10 bg-white p-3">
+                                        <label className="text-xs font-bold text-neutral-700">Display name</label>
+                                        <input
+                                            value={displayName}
+                                            onChange={(e) => setDisplayName(e.target.value)}
+                                            placeholder="Anonymous"
+                                            maxLength={40}
+                                            className="mt-2 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/20"
+                                        />
+                                        <div className="mt-1 text-[12px] text-neutral-600">
+                                            Keep it simple (e.g., “Clement J.”, “Ada”, “6chatting Supporter”). No @handles.
+                                        </div>
+                                    </div>
+                                ) : null}
                             </div>
 
                             <div className="mt-2 rounded-2xl border border-black/10 bg-white p-3">
