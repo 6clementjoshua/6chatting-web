@@ -373,7 +373,7 @@ export default function RefundsClient() {
                             <p>You can cancel to stop future renewals:</p>
                             <ul className="mt-3 ml-5 list-disc space-y-2">
                                 <li>
-                                    Via your {BRAND} account billing settings (where available), or
+                                    Via your {BRAND} account billing under settings or
                                 </li>
                                 <li>
                                     Via the payment provider portal (Stripe/Flutterwave checkout management) where applicable.
