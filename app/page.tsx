@@ -860,29 +860,119 @@ export default function Page() {
         </section>
 
         {/* ✅ Stories (premium + cardless) */}
+        {/* ✅ Stories (premium + aligned to heading) */}
         <section id="stories" className="pt-10 sm:pt-12 scroll-mt-24">
-          <FadeIn delayMs={0}>
-            <div className="flex flex-col gap-2">
-              <h2
-                className="text-[clamp(20px,3.2vw,30px)] font-extrabold tracking-[-0.04em] text-black"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                {STORIES_FEATURE.title}
-              </h2>
-              <p className="max-w-3xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
-                {STORIES_FEATURE.subtitle}
-              </p>
+          <div className="grid gap-6 md:grid-cols-[1.05fr_.95fr] md:items-start">
+            {/* LEFT — Heading + Copy */}
+            <div>
+              <FadeIn delayMs={0}>
+                <div className="flex flex-col gap-2">
+                  <h2
+                    className="text-[clamp(20px,3.2vw,30px)] font-extrabold tracking-[-0.04em] text-black"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {STORIES_FEATURE.title}
+                  </h2>
+
+                  <p className="max-w-3xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                    {STORIES_FEATURE.subtitle}
+                  </p>
+                </div>
+              </FadeIn>
+
+              <FadeIn delayMs={60}>
+                <div className="stories-text mt-5 md:mt-6">
+                  <div className="stories-kicker">
+                    <Pill className="!bg-white">Stories</Pill>
+                    <span className="stories-mini">Visible at the top of Home & Chats</span>
+                  </div>
+
+                  <p className="mt-3 text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                    {STORIES_FEATURE.overview}
+                  </p>
+
+                  <div className="mt-4">
+                    <div
+                      className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      How it works
+                    </div>
+
+                    <ul className="mt-2 stories-list">
+                      {STORIES_FEATURE.howItWorks.map((b) => (
+                        <li key={b} className="stories-li">
+                          <span className="stories-dot" />
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="mt-5 stories-tiers">
+                    <div className="stories-tier">
+                      <div
+                        className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        {STORIES_FEATURE.freeTier.title}
+                      </div>
+                      <ul className="mt-2 stories-list">
+                        {STORIES_FEATURE.freeTier.bullets.map((b) => (
+                          <li key={b} className="stories-li">
+                            <span className="stories-dot" />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="stories-tier">
+                      <div
+                        className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        {STORIES_FEATURE.premiumTier.title}
+                      </div>
+                      <ul className="mt-2 stories-list">
+                        {STORIES_FEATURE.premiumTier.bullets.map((b) => (
+                          <li key={b} className="stories-li">
+                            <span className="stories-dot" />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 stories-earn">
+                    <div className="flex items-center justify-between gap-3">
+                      <div
+                        className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        {STORIES_FEATURE.creatorProgram.title}
+                      </div>
+                      <Pill className="!bg-white">Creator Program</Pill>
+                    </div>
+
+                    <p className="mt-2 text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                      {STORIES_FEATURE.creatorProgram.body}
+                    </p>
+
+                    <p className="mt-2 text-[12.5px] leading-[1.6] text-neutral-600">
+                      {STORIES_FEATURE.creatorProgram.note}
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
             </div>
-          </FadeIn>
 
-          <div className="mt-0 stories-row">
-
-
-            {/* Media */}
+            {/* RIGHT — Image aligned with subtitle */}
             <FadeIn delayMs={40}>
-              <div className="stories-media">
+              <div className="stories-media md:mt-[2px]">
                 <div className="stories-glass">
-                  <div className="stories-img-wrap">
+                  <div className="stories-img-wrap stories-img-wrap--top">
                     <Image
                       src={STORIES_FEATURE.imageSrc}
                       alt={STORIES_FEATURE.imageAlt}
@@ -891,94 +981,6 @@ export default function Page() {
                       sizes="(max-width: 768px) 92vw, (max-width: 1200px) 46vw, 520px"
                     />
                   </div>
-                </div>
-              </div>
-            </FadeIn>
-
-            {/* Copy */}
-            <FadeIn delayMs={80}>
-              <div className="stories-text">
-                <div className="stories-kicker">
-                  <Pill className="!bg-white">Stories</Pill>
-                  <span className="stories-mini">Visible at the top of Home & Chats</span>
-                </div>
-
-                <p className="mt-3 text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
-                  {STORIES_FEATURE.overview}
-                </p>
-
-                <div className="mt-4">
-                  <div
-                    className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    How it works
-                  </div>
-
-                  <ul className="mt-2 stories-list">
-                    {STORIES_FEATURE.howItWorks.map((b) => (
-                      <li key={b} className="stories-li">
-                        <span className="stories-dot" />
-                        <span>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="mt-5 stories-tiers">
-                  <div className="stories-tier">
-                    <div
-                      className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
-                      {STORIES_FEATURE.freeTier.title}
-                    </div>
-                    <ul className="mt-2 stories-list">
-                      {STORIES_FEATURE.freeTier.bullets.map((b) => (
-                        <li key={b} className="stories-li">
-                          <span className="stories-dot" />
-                          <span>{b}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="stories-tier">
-                    <div
-                      className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
-                      {STORIES_FEATURE.premiumTier.title}
-                    </div>
-                    <ul className="mt-2 stories-list">
-                      {STORIES_FEATURE.premiumTier.bullets.map((b) => (
-                        <li key={b} className="stories-li">
-                          <span className="stories-dot" />
-                          <span>{b}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="mt-5 stories-earn">
-                  <div className="flex items-center justify-between gap-3">
-                    <div
-                      className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
-                      {STORIES_FEATURE.creatorProgram.title}
-                    </div>
-                    <Pill className="!bg-white">Creator Program</Pill>
-                  </div>
-
-                  <p className="mt-2 text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
-                    {STORIES_FEATURE.creatorProgram.body}
-                  </p>
-
-                  <p className="mt-2 text-[12.5px] leading-[1.6] text-neutral-600">
-                    {STORIES_FEATURE.creatorProgram.note}
-                  </p>
                 </div>
               </div>
             </FadeIn>
@@ -1524,6 +1526,23 @@ export default function Page() {
   position: relative;
   width: 100%;
   height: 260px;
+}
+
+/* ✅ Align image top closer to heading/subtitle line on desktop */
+.stories-img-wrap--top {
+  height: 320px;
+}
+
+@media (min-width: 640px) {
+  .stories-img-wrap--top {
+    height: 360px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .stories-img-wrap--top {
+    height: 420px;
+  }
 }
 
 /* Tablet */
