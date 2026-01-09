@@ -1,3 +1,4 @@
+// app/api/webhooks/flutterwave/route.ts
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
@@ -6,6 +7,68 @@ export const runtime = "nodejs";
 // Flutterwave may "ping" the URL when saving, sometimes via GET
 export async function GET() {
     return NextResponse.json({ ok: true });
+}
+
+function formatMoneyMinor(amountMinor: number, currency: string) {
+    const cur = String(currency || "USD").toUpperCase();
+    const major = Number(amountMinor || 0) / 100;
+    try {
+        return new Intl.NumberFormat(undefined, { style: "currency", currency: cur }).format(major);
+    } catch {
+        return `${cur} ${major.toLocaleString()}`;
+    }
+}
+
+// Branded email (optional, failsafe)
+async function sendThankYouEmail(args: {
+    to: string;
+    displayName?: string | null;
+    amountMinor: number;
+    currency: string;
+    provider: "flutterwave";
+    receiptUrl?: string | null;
+}) {
+    const apiKey = process.env.RESEND_API_KEY;
+    const from = process.env.SUPPORT_FROM_EMAIL;
+    const replyTo = process.env.SUPPORT_REPLY_TO || undefined;
+    const site = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "";
+
+    if (!apiKey || !from) return;
+
+    const name = (args.displayName || "").trim() || "there";
+    const amountFormatted = formatMoneyMinor(args.amountMinor, args.currency);
+
+    const subject = "Thank you for supporting the build of 6chatting";
+    const text = [
+        `Hi ${name},`,
+        ``,
+        `Thank you for supporting the build of 6chatting.`,
+        `We’ve confirmed your contribution of ${amountFormatted} via FLUTTERWAVE.`,
+        ``,
+        `Your support helps infrastructure, reliability, and launch readiness for premium real-time translation.`,
+        args.receiptUrl ? `Receipt: ${args.receiptUrl}` : "",
+        site ? `Founding Supporters: ${site}/founding-supporters` : "",
+        ``,
+        `— 6chatting`,
+        `A 6clement Joshua Service`,
+    ]
+        .filter(Boolean)
+        .join("\n");
+
+    await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            from,
+            to: [args.to],
+            subject,
+            text,
+            reply_to: replyTo,
+        }),
+    });
 }
 
 export async function POST(req: Request) {
@@ -21,7 +84,6 @@ export async function POST(req: Request) {
         body = null;
     }
 
-    // IMPORTANT:
     // If Flutterwave is validating the URL (missing header / missing hash),
     // return 200 so they don't show "malformed response".
     // But do not process anything unless signature matches.
@@ -46,6 +108,7 @@ export async function POST(req: Request) {
                         ? "failed"
                         : "pending";
 
+            // Update contribution status
             await sb
                 .from("support_contributions")
                 .update({
@@ -55,11 +118,13 @@ export async function POST(req: Request) {
                 })
                 .eq("provider_tx_ref", txRef);
 
-            // ✅ If succeeded and opted-in, publish to Founding Supporters list
+            // If succeeded: publish supporter (opt-in) + send branded thank-you email
             if (newStatus === "succeeded") {
                 const { data: contrib, error: contribErr } = await sb
                     .from("support_contributions")
-                    .select("id, recognize, display_name, amount, currency, provider")
+                    .select(
+                        "id, recognize, display_name, amount, currency, provider, supporter_email, receipt_url"
+                    )
                     .eq("provider_tx_ref", txRef)
                     .single();
 
@@ -72,14 +137,24 @@ export async function POST(req: Request) {
                         provider: contrib.provider,
                     });
                 }
-            }
 
+                if (!contribErr && contrib?.supporter_email) {
+                    await sendThankYouEmail({
+                        to: contrib.supporter_email,
+                        displayName: contrib.display_name,
+                        amountMinor: contrib.amount,
+                        currency: contrib.currency,
+                        provider: "flutterwave",
+                        receiptUrl: contrib.receipt_url || null,
+                    });
+                }
+            }
         }
 
+        // Always 200 to avoid retry storms
         return NextResponse.json({ ok: true });
-    } catch (e: any) {
-        // Still return 200 to avoid Flutterwave retry storms during transient issues,
-        // but record failure server-side if you want later.
+    } catch {
+        // Still return 200 to avoid retry storms; you can inspect logs if needed.
         return NextResponse.json({ ok: true });
     }
 }
