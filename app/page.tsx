@@ -875,7 +875,9 @@ export default function Page() {
             </div>
           </FadeIn>
 
-          <div className="mt-5 stories-row">
+          <div className="mt-0 stories-row">
+
+
             {/* Media */}
             <FadeIn delayMs={40}>
               <div className="stories-media">
@@ -1520,18 +1522,35 @@ export default function Page() {
 .stories-img-wrap {
   position: relative;
   width: 100%;
-  height: 240px;
+  height: 260px;
 }
+
+/* Tablet */
 @media (min-width: 640px) {
   .stories-img-wrap {
-    height: 280px;
+    height: 320px;
   }
 }
+
+/* Desktop – bigger, premium */
+@media (min-width: 1024px) {
+  .stories-img-wrap {
+    height: 380px;
+  }
+}
+
 
 .stories-img {
   transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 320ms ease;
   will-change: transform;
 }
+
+@media (min-width: 1024px) {
+  .stories-img {
+    transform: scale(1.03);
+  }
+}
+
 .stories-glass:hover .stories-img {
   transform: scale(1.02);
   filter: contrast(1.02);
