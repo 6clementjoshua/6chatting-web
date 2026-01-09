@@ -14,7 +14,9 @@ const DESKTOP_NAV = [
     { label: "Jobs", href: "/jobs" },
     { label: "Pricing", href: "/pricing" },
     { label: "Compatibility", href: "/compatibility" },
+    { label: "Partners", href: "/partners" },
 ];
+
 
 function cx(...parts: Array<string | false | undefined | null>) {
     return parts.filter(Boolean).join(" ");

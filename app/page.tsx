@@ -912,22 +912,40 @@ export default function Page() {
               <Link href="/policies/terms" target="_blank" rel="noopener noreferrer">
                 Terms of Service
               </Link>
+
               <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer">
                 Privacy Policy
               </Link>
-              <Link href="/policies/subscription-billing" target="_blank" rel="noopener noreferrer">
-                Subscription & Billing
+
+              <Link href="/policies/safety" target="_blank" rel="noopener noreferrer">
+                Safety
               </Link>
-              <Link href="/policies/refunds" target="_blank" rel="noopener noreferrer">
-                Refund & Cancellation
-              </Link>
+
               <Link href="/policies/acceptable-use" target="_blank" rel="noopener noreferrer">
                 Acceptable Use
               </Link>
+
+              <Link href="/policies/subscription-billing" target="_blank" rel="noopener noreferrer">
+                Subscription & Billing
+              </Link>
+
+              <Link href="/policies/refunds" target="_blank" rel="noopener noreferrer">
+                Refund & Cancellation
+              </Link>
+
+              <Link href="/policies/ai-translation" target="_blank" rel="noopener noreferrer">
+                AI & Translation
+              </Link>
+
+              <Link href="/policies/cookies" target="_blank" rel="noopener noreferrer">
+                Cookies
+              </Link>
+
               <Link href="/policies/contact" target="_blank" rel="noopener noreferrer">
                 Contact
               </Link>
             </div>
+
 
             <div className="mt-5 text-center text-xs font-normal text-neutral-600">
               © {year} 6chatting. <span className="mx-1">A 6clement Joshua Service.</span> All rights reserved.
