@@ -187,6 +187,117 @@ const STORIES_FEATURE = {
   },
 };
 
+const SYNC_FEATURE = {
+  title: "Multi-device sync",
+  subtitle: "One account. Consistent experience across phone, tablet, and desktop.",
+  overview:
+    "6chatting keeps your conversations synced across your devices, so you can switch screens without losing context—while giving you control over active sessions.",
+  bullets: [
+    "Continue chats seamlessly across devices (phone, tablet, desktop)",
+    "Session controls to sign out of devices you no longer use",
+    "Sync designed to feel fast and consistent",
+    "Security checks help protect access when devices change",
+  ],
+};
+
+const INBOX_FEATURE = {
+  title: "Message requests & inbox",
+  subtitle: "Control who can reach you—without missing important messages.",
+  overview:
+    "6chatting separates your main conversations from new or unknown contacts. This reduces spam, prevents unwanted DMs, and keeps your inbox clean—especially for creators and businesses.",
+  bullets: [
+    "Primary inbox for people you already chat with",
+    "Requests inbox for new/unknown contacts (approve or decline)",
+    "Spam filtering designed to reduce unwanted messages",
+    "Business accounts can manage higher-volume requests more efficiently",
+  ],
+};
+
+const TRANSLATION_CONTROLS_FEATURE = {
+  title: "Translation controls",
+  subtitle: "Translation that you can control—per chat, per contact, and per moment.",
+  overview:
+    "Translation is designed to feel natural: you can view original text, see translated text, and control how translation behaves in conversations. For free users, translation is limited. Premium unlocks full real-time translation.",
+  bullets: [
+    "View original + translated text (side-by-side clarity)",
+    "Translation indicators so users know what was translated",
+    "Optional per-chat controls (turn translation on/off where needed)",
+    "Designed for both personal and business conversations",
+  ],
+  tiers: {
+    free: {
+      title: "Free accounts (limited translation)",
+      bullets: [
+        "Limited translation access (caps apply)",
+        "When limits are reached, some messages may show in original text only",
+        "Best for trying the experience and light usage",
+      ],
+    },
+    premium: {
+      title: "Premium accounts (full translation)",
+      bullets: [
+        "Full real-time translation for chats (text translation enabled)",
+        "Designed for daily cross-border communication",
+        "Best for creators, businesses, teams, and frequent travelers",
+      ],
+    },
+  },
+};
+
+const SAFETY_FEATURE = {
+  title: "Privacy & safety controls",
+  subtitle: "Clear controls that protect your identity, inbox, and experience.",
+  overview:
+    "6chatting includes safety controls that help users reduce spam, avoid impersonation, and manage who can contact them. Enforcement actions apply to accounts that violate policies.",
+  bullets: [
+    "Block and report controls",
+    "Message request filtering and spam reduction",
+    "Verification signals help reduce impersonation",
+    "Enforcement: we may restrict, suspend, or remove accounts that violate policies",
+  ],
+};
+
+const GROUPS_FEATURE = {
+  title: "Groups & communities",
+  subtitle: "Group chats built for multi-language communities.",
+  overview:
+    "Group chats help teams, families, and communities stay connected—even when members speak different languages. Admin tools keep groups organized and safe.",
+  bullets: [
+    "Group chats for friends, teams, communities, and customer groups",
+    "Admin tools (basic moderation and group controls)",
+    "Invite links (optional) for fast joining",
+    "Translation designed to help mixed-language groups communicate",
+  ],
+};
+
+const MEDIA_FEATURE = {
+  title: "Media & file sharing",
+  subtitle: "Share media and documents confidently—built for modern conversations.",
+  overview:
+    "Share images, voice notes, and documents to keep conversations complete. Upload limits and supported file types may vary by plan.",
+  bullets: [
+    "Share images and media in conversations",
+    "Voice notes designed for natural communication",
+    "Share documents (e.g., PDFs) where supported",
+    "Safety scanning and abuse prevention helps protect users",
+  ],
+};
+
+const PREMIUM_DIFF_FEATURE = {
+  title: "What changes when you upgrade",
+  subtitle: "Premium unlocks the complete 6chatting experience.",
+  overview:
+    "Free accounts are great for exploring, but Premium unlocks full translation, higher usage, and expanded capabilities built for daily cross-border communication and business readiness.",
+  bullets: [
+    "Full text translation enabled in chats (Premium)",
+    "Unlimited Stories (Premium) vs limited Stories on free accounts",
+    "Designed for creators and businesses who need consistent visibility",
+    "Higher limits and advanced capabilities may apply by plan",
+  ],
+};
+
+
+
 function cx(...parts: Array<string | false | undefined | null>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -626,6 +737,35 @@ export default function Page() {
           </FadeIn>
         </section>
 
+        {/* ✅ Multi-device sync */}
+        <section id="multi-device-sync" className="pt-9 sm:pt-10 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <div className="flow-head">
+              <h2 className="flow-title" style={{ fontFamily: "var(--font-display)" }}>
+                {SYNC_FEATURE.title}
+              </h2>
+              <p className="flow-sub">{SYNC_FEATURE.subtitle}</p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-4 flow-glass">
+            <div className="flow-box">
+              <p className="flow-body">{SYNC_FEATURE.overview}</p>
+
+              <ul className="mt-3 flow-list">
+                {SYNC_FEATURE.bullets.map((b) => (
+                  <li key={b} className="flow-li">
+                    <span className="flow-dot" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-6 flow-divider" />
+        </section>
+
 
         {/* ✅ After Product Preview: Know your users */}
         <section id="know-your-users" className="pt-9 sm:pt-10 scroll-mt-24">
@@ -741,6 +881,36 @@ export default function Page() {
           </div>
         </section>
 
+        {/* ✅ Groups & communities */}
+        <section id="groups" className="pt-10 sm:pt-12 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <div className="flow-head">
+              <h2 className="flow-title" style={{ fontFamily: "var(--font-display)" }}>
+                {GROUPS_FEATURE.title}
+              </h2>
+              <p className="flow-sub">{GROUPS_FEATURE.subtitle}</p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-4 flow-glass">
+            <div className="flow-box">
+              <p className="flow-body">{GROUPS_FEATURE.overview}</p>
+
+              <ul className="mt-3 flow-list">
+                {GROUPS_FEATURE.bullets.map((b) => (
+                  <li key={b} className="flow-li">
+                    <span className="flow-dot" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-6 flow-divider" />
+        </section>
+
+
         {/* ✅ What you control (premium clarity, lightweight) */}
         <section id="what-you-control" className="pt-9 sm:pt-10 scroll-mt-24">
           <FadeIn delayMs={0}>
@@ -783,6 +953,35 @@ export default function Page() {
               </FadeIn>
             ))}
           </div>
+        </section>
+
+        {/* ✅ Privacy & safety controls */}
+        <section id="privacy-safety" className="pt-10 sm:pt-12 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <div className="flow-head">
+              <h2 className="flow-title" style={{ fontFamily: "var(--font-display)" }}>
+                {SAFETY_FEATURE.title}
+              </h2>
+              <p className="flow-sub">{SAFETY_FEATURE.subtitle}</p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-4 flow-glass">
+            <div className="flow-box">
+              <p className="flow-body">{SAFETY_FEATURE.overview}</p>
+
+              <ul className="mt-3 flow-list">
+                {SAFETY_FEATURE.bullets.map((b) => (
+                  <li key={b} className="flow-li">
+                    <span className="flow-dot" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-6 flow-divider" />
         </section>
 
 
@@ -858,6 +1057,65 @@ export default function Page() {
             })}
           </div>
         </section>
+
+        {/* ✅ Message requests & inbox */}
+        <section id="message-requests" className="pt-10 sm:pt-12 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <div className="flow-head">
+              <h2 className="flow-title" style={{ fontFamily: "var(--font-display)" }}>
+                {INBOX_FEATURE.title}
+              </h2>
+              <p className="flow-sub">{INBOX_FEATURE.subtitle}</p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-4 flow-glass">
+            <div className="flow-box">
+              <p className="flow-body">{INBOX_FEATURE.overview}</p>
+
+              <ul className="mt-3 flow-list">
+                {INBOX_FEATURE.bullets.map((b) => (
+                  <li key={b} className="flow-li">
+                    <span className="flow-dot" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-6 flow-divider" />
+        </section>
+
+        {/* ✅ Media & file sharing */}
+        <section id="media-sharing" className="pt-10 sm:pt-12 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <div className="flow-head">
+              <h2 className="flow-title" style={{ fontFamily: "var(--font-display)" }}>
+                {MEDIA_FEATURE.title}
+              </h2>
+              <p className="flow-sub">{MEDIA_FEATURE.subtitle}</p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-4 flow-glass">
+            <div className="flow-box">
+              <p className="flow-body">{MEDIA_FEATURE.overview}</p>
+
+              <ul className="mt-3 flow-list">
+                {MEDIA_FEATURE.bullets.map((b) => (
+                  <li key={b} className="flow-li">
+                    <span className="flow-dot" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-6 flow-divider" />
+        </section>
+
 
         {/* ✅ Stories (premium + cardless) */}
         {/* ✅ Stories (premium + aligned to heading) */}
@@ -989,6 +1247,64 @@ export default function Page() {
           <div className="mt-6 stories-divider" />
         </section>
 
+        {/* ✅ Translation controls */}
+        <section id="translation-controls" className="pt-10 sm:pt-12 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <div className="flow-head">
+              <h2 className="flow-title" style={{ fontFamily: "var(--font-display)" }}>
+                {TRANSLATION_CONTROLS_FEATURE.title}
+              </h2>
+              <p className="flow-sub">{TRANSLATION_CONTROLS_FEATURE.subtitle}</p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-4 flow-glass">
+            <div className="flow-box">
+              <p className="flow-body">{TRANSLATION_CONTROLS_FEATURE.overview}</p>
+
+              <ul className="mt-3 flow-list">
+                {TRANSLATION_CONTROLS_FEATURE.bullets.map((b) => (
+                  <li key={b} className="flow-li">
+                    <span className="flow-dot" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-5 flow-tiers">
+                <div className="flow-tier">
+                  <div className="flow-tier-title" style={{ fontFamily: "var(--font-display)" }}>
+                    {TRANSLATION_CONTROLS_FEATURE.tiers.free.title}
+                  </div>
+                  <ul className="mt-2 flow-list">
+                    {TRANSLATION_CONTROLS_FEATURE.tiers.free.bullets.map((b) => (
+                      <li key={b} className="flow-li">
+                        <span className="flow-dot" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="flow-tier">
+                  <div className="flow-tier-title" style={{ fontFamily: "var(--font-display)" }}>
+                    {TRANSLATION_CONTROLS_FEATURE.tiers.premium.title}
+                  </div>
+                  <ul className="mt-2 flow-list">
+                    {TRANSLATION_CONTROLS_FEATURE.tiers.premium.bullets.map((b) => (
+                      <li key={b} className="flow-li">
+                        <span className="flow-dot" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 flow-divider" />
+        </section>
 
 
         {/* ✅ Remaining images */}
@@ -1175,6 +1491,36 @@ export default function Page() {
             </BevelCard>
           </div>
         </section>
+
+        {/* ✅ What changes when you upgrade */}
+        <section id="upgrade" className="pt-10 sm:pt-12 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <div className="flow-head">
+              <h2 className="flow-title" style={{ fontFamily: "var(--font-display)" }}>
+                {PREMIUM_DIFF_FEATURE.title}
+              </h2>
+              <p className="flow-sub">{PREMIUM_DIFF_FEATURE.subtitle}</p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-4 flow-glass">
+            <div className="flow-box">
+              <p className="flow-body">{PREMIUM_DIFF_FEATURE.overview}</p>
+
+              <ul className="mt-3 flow-list">
+                {PREMIUM_DIFF_FEATURE.bullets.map((b) => (
+                  <li key={b} className="flow-li">
+                    <span className="flow-dot" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-6 flow-divider" />
+        </section>
+
 
         {/* ✅ Final CTA (premium close) */}
         <section className="pt-10 sm:pt-12">
@@ -1647,6 +1993,127 @@ export default function Page() {
   width: 100%;
   background: linear-gradient(to right, rgba(0,0,0,0.04), rgba(0,0,0,0.12), rgba(0,0,0,0.04));
 }
+  /* ✅ Generic premium flow blocks (text-first, glass) */
+.flow-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.flow-title {
+  font-size: clamp(20px, 3.2vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #000;
+}
+
+.flow-sub {
+  max-width: 56rem;
+  font-size: 14px;
+  line-height: 1.75;
+  color: rgba(82, 82, 82, 1);
+}
+
+@media (min-width: 640px) {
+  .flow-sub {
+    font-size: 14.5px;
+  }
+}
+
+.flow-glass {
+  border-radius: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 14px 14px 28px rgba(0, 0, 0, 0.10), -14px -14px 28px rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+}
+
+.flow-box {
+  padding: 14px;
+}
+
+@media (min-width: 640px) {
+  .flow-box {
+    padding: 16px;
+  }
+}
+
+.flow-body {
+  font-size: 14px;
+  line-height: 1.75;
+  color: rgba(64, 64, 64, 1);
+}
+
+@media (min-width: 640px) {
+  .flow-body {
+    font-size: 14.5px;
+  }
+}
+
+.flow-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.flow-li {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 10px;
+  align-items: start;
+  color: rgba(64, 64, 64, 1);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.flow-dot {
+  margin-top: 8px;
+  height: 6px;
+  width: 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.10);
+}
+
+.flow-tiers {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 640px) {
+  .flow-tiers {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
+
+.flow-tier {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 12px;
+  box-shadow: 10px 10px 22px rgba(0, 0, 0, 0.08), -10px -10px 22px rgba(255, 255, 255, 0.80);
+}
+
+.flow-tier-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #000;
+}
+
+.flow-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(to right, rgba(0,0,0,0.04), rgba(0,0,0,0.12), rgba(0,0,0,0.04));
+}
+
         `}</style>
       </main>
     </div>
