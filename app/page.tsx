@@ -149,6 +149,44 @@ const NAV_EXPLAIN = [
 ];
 
 
+
+const STORIES_FEATURE = {
+  title: "Stories",
+  subtitle: "Share moments. Stay visible. Earn opportunities.",
+  imageSrc: "/images/stories/story-status-indicators.png",
+  imageAlt: "Stories row with viewed/unviewed rings and verified account ticks on 6chatting",
+  overview:
+    "Stories let you share short, time-based updates that appear at the top of Home and Chats—so people can see what’s new instantly without scrolling through feeds.",
+  howItWorks: [
+    "A colored ring means there’s a new story to view",
+    "A faded or broken ring shows stories you’ve already viewed",
+    "Segmented rings indicate multiple stories from the same user",
+    "Verified accounts show their tick alongside stories for trust and clarity",
+  ],
+  freeTier: {
+    title: "Free personal accounts",
+    bullets: [
+      "Up to 1 story post per 24 hours",
+      "Maximum of 3 story posts per week",
+      "Best for casual sharing and staying visible",
+    ],
+  },
+  premiumTier: {
+    title: "Premium & business accounts",
+    bullets: [
+      "Unlimited story posts",
+      "Post as frequently as you want",
+      "Ideal for creators, brands, and businesses that need daily visibility",
+    ],
+  },
+  creatorProgram: {
+    title: "Earn with Stories (Creator Program)",
+    body:
+      "Stories can also be part of the 6chatting Creator Program. Eligible users can earn from story engagement and visibility, promote content or services, and reach global audiences through automatic translation.",
+    note: "Creator earnings and eligibility rules apply and may vary by region.",
+  },
+};
+
 function cx(...parts: Array<string | false | undefined | null>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -821,6 +859,133 @@ export default function Page() {
           </div>
         </section>
 
+        {/* ✅ Stories (premium + cardless) */}
+        <section id="stories" className="pt-10 sm:pt-12 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <div className="flex flex-col gap-2">
+              <h2
+                className="text-[clamp(20px,3.2vw,30px)] font-extrabold tracking-[-0.04em] text-black"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {STORIES_FEATURE.title}
+              </h2>
+              <p className="max-w-3xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                {STORIES_FEATURE.subtitle}
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-5 stories-row">
+            {/* Media */}
+            <FadeIn delayMs={40}>
+              <div className="stories-media">
+                <div className="stories-glass">
+                  <div className="stories-img-wrap">
+                    <Image
+                      src={STORIES_FEATURE.imageSrc}
+                      alt={STORIES_FEATURE.imageAlt}
+                      fill
+                      className="stories-img object-contain"
+                      sizes="(max-width: 768px) 92vw, (max-width: 1200px) 46vw, 520px"
+                    />
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+
+            {/* Copy */}
+            <FadeIn delayMs={80}>
+              <div className="stories-text">
+                <div className="stories-kicker">
+                  <Pill className="!bg-white">Stories</Pill>
+                  <span className="stories-mini">Visible at the top of Home & Chats</span>
+                </div>
+
+                <p className="mt-3 text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                  {STORIES_FEATURE.overview}
+                </p>
+
+                <div className="mt-4">
+                  <div
+                    className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    How it works
+                  </div>
+
+                  <ul className="mt-2 stories-list">
+                    {STORIES_FEATURE.howItWorks.map((b) => (
+                      <li key={b} className="stories-li">
+                        <span className="stories-dot" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mt-5 stories-tiers">
+                  <div className="stories-tier">
+                    <div
+                      className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      {STORIES_FEATURE.freeTier.title}
+                    </div>
+                    <ul className="mt-2 stories-list">
+                      {STORIES_FEATURE.freeTier.bullets.map((b) => (
+                        <li key={b} className="stories-li">
+                          <span className="stories-dot" />
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="stories-tier">
+                    <div
+                      className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      {STORIES_FEATURE.premiumTier.title}
+                    </div>
+                    <ul className="mt-2 stories-list">
+                      {STORIES_FEATURE.premiumTier.bullets.map((b) => (
+                        <li key={b} className="stories-li">
+                          <span className="stories-dot" />
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-5 stories-earn">
+                  <div className="flex items-center justify-between gap-3">
+                    <div
+                      className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      {STORIES_FEATURE.creatorProgram.title}
+                    </div>
+                    <Pill className="!bg-white">Creator Program</Pill>
+                  </div>
+
+                  <p className="mt-2 text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                    {STORIES_FEATURE.creatorProgram.body}
+                  </p>
+
+                  <p className="mt-2 text-[12.5px] leading-[1.6] text-neutral-600">
+                    {STORIES_FEATURE.creatorProgram.note}
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+
+          <div className="mt-6 stories-divider" />
+        </section>
+
+
 
         {/* ✅ Remaining images */}
         <section id="more-translation" className="pt-9 sm:pt-10 scroll-mt-24">
@@ -1330,7 +1495,119 @@ export default function Page() {
     rgba(0,0,0,0.04)
   );
 }
+.stories-row {
+  display: grid;
+  gap: 14px;
+  align-items: center;
+}
+@media (min-width: 768px) {
+  .stories-row {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 22px;
+  }
+}
 
+.stories-glass {
+  border-radius: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 14px 14px 28px rgba(0, 0, 0, 0.10), -14px -14px 28px rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+}
+
+.stories-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 240px;
+}
+@media (min-width: 640px) {
+  .stories-img-wrap {
+    height: 280px;
+  }
+}
+
+.stories-img {
+  transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 320ms ease;
+  will-change: transform;
+}
+.stories-glass:hover .stories-img {
+  transform: scale(1.02);
+  filter: contrast(1.02);
+}
+
+.stories-text {
+  padding: 4px 2px;
+}
+
+.stories-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.stories-mini {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.stories-tiers {
+  display: grid;
+  gap: 14px;
+}
+@media (min-width: 640px) {
+  .stories-tiers {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
+
+.stories-tier,
+.stories-earn {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 12px;
+  box-shadow: 10px 10px 22px rgba(0, 0, 0, 0.08), -10px -10px 22px rgba(255, 255, 255, 0.80);
+}
+
+.stories-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.stories-li {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 10px;
+  align-items: start;
+  color: rgba(64, 64, 64, 1);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.stories-dot {
+  margin-top: 8px;
+  height: 6px;
+  width: 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.10);
+}
+
+.stories-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(to right, rgba(0,0,0,0.04), rgba(0,0,0,0.12), rgba(0,0,0,0.04));
+}
         `}</style>
       </main>
     </div>
