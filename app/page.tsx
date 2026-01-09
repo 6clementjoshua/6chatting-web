@@ -187,6 +187,63 @@ const STORIES_FEATURE = {
   },
 };
 
+const CREATOR_EARNINGS_FEATURE = {
+  title: "Creator Earnings",
+  subtitle: "Earn coins from engagement — track performance, payouts, and reach.",
+  imageSrc: "/images/earnings/creator-earnings-device.png",
+  imageAlt: "Creator earnings dashboard on a dark 6chatting device screen with coin stats and breakdown",
+  overview:
+    "The Creator Program turns visibility into measurable earnings. Track coins from Stories and Posts, see what’s performing, and understand how your translated reach drives engagement across languages.",
+  bullets: [
+    "See coins earned from Stories, Posts, and eligible actions",
+    "Track views, engagement rate, and payout-ready balance",
+    "Understand which content performs best across regions",
+    "Translation expands reach — content can earn across multiple languages",
+  ],
+  translationLimitNote:
+    "Translation is limited on free plans. Premium accounts unlock broader translation coverage for more consistent cross-border reach.",
+  learnMoreHref: "/learn/creator-earnings",
+  learnMoreLabel: "Learn more",
+};
+
+
+const ADS_FEATURE = {
+  title: "Ads & Promotions",
+  subtitle: "Reach beyond your network — across languages and borders.",
+  imageSrc: "/images/ads/sponsored-post-device.png",
+  imageAlt: "Sponsored post displayed on 6chatting with verified account and global reach indicators",
+  overview:
+    "Ads and Promotions let verified users amplify their content responsibly. Sponsored content appears clearly labeled and reaches people who matter — without disrupting conversations.",
+  eligibility: {
+    title: "Who can promote content",
+    bullets: [
+      "Verified personal accounts (Blue tick) — creators, professionals, public figures",
+      "Verified business accounts (White or Gold tick)",
+      "Unverified and anonymous accounts cannot run ads",
+    ],
+  },
+  placements: {
+    title: "Where promotions appear",
+    bullets: [
+      "Sponsored stories (clearly labeled)",
+      "Sponsored posts in Home feed",
+      "Optional promoted visibility for creators and brands",
+    ],
+  },
+  benefits: {
+    title: "Why promotions work better on 6chatting",
+    bullets: [
+      "Automatic translation so your message reaches global audiences",
+      "Clear ‘Sponsored’ labels to maintain trust",
+      "Language-aware delivery across regions",
+      "Designed for discovery — not interruption",
+    ],
+  },
+  note:
+    "All promotions follow strict quality, safety, and frequency rules to protect user experience.",
+};
+
+
 const SYNC_FEATURE = {
   title: "Multi-device sync",
   subtitle: "One account. Consistent experience across phone, tablet, and desktop.",
@@ -1247,6 +1304,117 @@ export default function Page() {
           <div className="mt-6 stories-divider" />
         </section>
 
+        {/* ✅ Ads & Promotions (verified only, premium) */}
+        <section id="ads" className="pt-10 sm:pt-12 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <div className="flex flex-col gap-2">
+              <h2
+                className="text-[clamp(20px,3.2vw,30px)] font-extrabold tracking-[-0.04em] text-black"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {ADS_FEATURE.title}
+              </h2>
+              <p className="max-w-3xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                {ADS_FEATURE.subtitle}
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-2 stories-row">
+            {/* Media */}
+            <FadeIn delayMs={40}>
+              <div className="stories-media">
+                <div className="stories-glass">
+                  <div className="stories-img-wrap">
+                    <Image
+                      src={ADS_FEATURE.imageSrc}
+                      alt={ADS_FEATURE.imageAlt}
+                      fill
+                      className="stories-img object-contain object-top"
+                      sizes="(max-width: 768px) 92vw, (max-width: 1200px) 46vw, 520px"
+                    />
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+
+            {/* Copy */}
+            <FadeIn delayMs={80}>
+              <div className="stories-text">
+                <div className="stories-kicker">
+                  <Pill className="!bg-white">Sponsored</Pill>
+                  <span className="stories-mini">Verified accounts only</span>
+                </div>
+
+                <p className="mt-3 text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                  {ADS_FEATURE.overview}
+                </p>
+
+                <div className="mt-4">
+                  <div
+                    className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {ADS_FEATURE.eligibility.title}
+                  </div>
+
+                  <ul className="mt-2 stories-list">
+                    {ADS_FEATURE.eligibility.bullets.map((b) => (
+                      <li key={b} className="stories-li">
+                        <span className="stories-dot" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mt-4">
+                  <div
+                    className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {ADS_FEATURE.placements.title}
+                  </div>
+
+                  <ul className="mt-2 stories-list">
+                    {ADS_FEATURE.placements.bullets.map((b) => (
+                      <li key={b} className="stories-li">
+                        <span className="stories-dot" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mt-4">
+                  <div
+                    className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {ADS_FEATURE.benefits.title}
+                  </div>
+
+                  <ul className="mt-2 stories-list">
+                    {ADS_FEATURE.benefits.bullets.map((b) => (
+                      <li key={b} className="stories-li">
+                        <span className="stories-dot" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <p className="mt-4 text-[12.5px] leading-[1.6] text-neutral-600">
+                  {ADS_FEATURE.note}
+                </p>
+              </div>
+            </FadeIn>
+          </div>
+
+          <div className="mt-6 stories-divider" />
+        </section>
+
+
         {/* ✅ Translation controls */}
         <section id="translation-controls" className="pt-10 sm:pt-12 scroll-mt-24">
           <FadeIn delayMs={0}>
@@ -1519,6 +1687,99 @@ export default function Page() {
           </div>
 
           <div className="mt-6 flow-divider" />
+        </section>
+
+        {/* ✅ Creator Earnings (last flow) */}
+        <section id="creator-earnings" className="pt-10 sm:pt-12 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <div className="flex flex-col gap-2">
+              <h2
+                className="text-[clamp(20px,3.2vw,30px)] font-extrabold tracking-[-0.04em] text-black"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {CREATOR_EARNINGS_FEATURE.title}
+              </h2>
+              <p className="max-w-3xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                {CREATOR_EARNINGS_FEATURE.subtitle}
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-0 stories-row">
+            {/* Media */}
+            <FadeIn delayMs={40}>
+              <div className="stories-media">
+                <div className="stories-glass">
+                  <div className="earnings-img-wrap">
+                    <Image
+                      src={CREATOR_EARNINGS_FEATURE.imageSrc}
+                      alt={CREATOR_EARNINGS_FEATURE.imageAlt}
+                      fill
+                      className="stories-img object-contain"
+                      sizes="(max-width: 768px) 92vw, (max-width: 1200px) 46vw, 520px"
+                    />
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+
+            {/* Copy */}
+            <FadeIn delayMs={80}>
+              <div className="stories-text">
+                <div className="stories-kicker">
+                  <Pill className="!bg-white">Creator Program</Pill>
+                  <span className="stories-mini">Earnings • Coins • Payouts</span>
+                </div>
+
+                <p className="mt-3 text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                  {CREATOR_EARNINGS_FEATURE.overview}
+                </p>
+
+                <div className="mt-4">
+                  <div
+                    className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    What you can track
+                  </div>
+
+                  <ul className="mt-2 stories-list">
+                    {CREATOR_EARNINGS_FEATURE.bullets.map((b) => (
+                      <li key={b} className="stories-li">
+                        <span className="stories-dot" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mt-5 stories-earn">
+                  <div
+                    className="text-[13px] font-extrabold tracking-[-0.02em] text-black"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    Translation & plan limits
+                  </div>
+
+                  <p className="mt-2 text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                    {CREATOR_EARNINGS_FEATURE.translationLimitNote}
+                  </p>
+
+                  <div className="pt-3">
+                    <Button
+                      href={CREATOR_EARNINGS_FEATURE.learnMoreHref}
+                      ariaLabel={CREATOR_EARNINGS_FEATURE.learnMoreLabel}
+                      className="w-full sm:w-fit"
+                    >
+                      {CREATOR_EARNINGS_FEATURE.learnMoreLabel}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+
+          <div className="mt-6 stories-divider" />
         </section>
 
 
@@ -2113,6 +2374,25 @@ export default function Page() {
   width: 100%;
   background: linear-gradient(to right, rgba(0,0,0,0.04), rgba(0,0,0,0.12), rgba(0,0,0,0.04));
 }
+  /* ✅ Creator Earnings image sizing (bigger + closer to heading) */
+.earnings-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 340px; /* mobile larger */
+}
+
+@media (min-width: 640px) {
+  .earnings-img-wrap {
+    height: 420px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .earnings-img-wrap {
+    height: 560px; /* desktop: premium, fills the space */
+  }
+}
+
 
         `}</style>
       </main>
