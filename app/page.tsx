@@ -1783,6 +1783,68 @@ export default function Page() {
         </section>
 
 
+        {/* ✅ Live (Creators & Business) */}
+        <section id="live" className="pt-10 sm:pt-12 scroll-mt-24">
+          <FadeIn delayMs={0}>
+            <BevelCard className="p-5 sm:p-7">
+              <div className="grid gap-5 md:grid-cols-[1.05fr_.95fr] md:items-center">
+
+                {/* Image */}
+                <div className="relative w-full overflow-hidden rounded-2xl border border-black/10 bg-white h-[320px] sm:h-[420px] md:h-[520px]">
+                  <Image
+                    src="/images/live/live-creator-business.png"
+                    alt="Live streaming for creators and businesses on 6chatting"
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 92vw, 640px"
+                    priority
+                  />
+                </div>
+
+
+                {/* Copy */}
+                <div className="flex flex-col gap-3">
+                  <Pill>Live • Real-time • Global</Pill>
+
+                  <h2
+                    className="text-[clamp(20px,3.2vw,30px)] font-extrabold tracking-[-0.04em] text-black"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    Go live. Reach the world instantly.
+                  </h2>
+
+                  <p className="text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
+                    Live lets verified creators and businesses host real-time sessions—shows, demos, launches, Q&A, and events—
+                    while viewers engage through chat, reactions, and translated conversations.
+                  </p>
+
+                  <ul className="stories-list">
+                    <li className="stories-li">
+                      <span className="stories-dot" />
+                      <span>Creator Live — engage fans, receive gifts, and grow your audience</span>
+                    </li>
+                    <li className="stories-li">
+                      <span className="stories-dot" />
+                      <span>Business Live — product demos, announcements, and customer interaction</span>
+                    </li>
+                    <li className="stories-li">
+                      <span className="stories-dot" />
+                      <span>Live chat with real-time translation for global viewers</span>
+                    </li>
+                  </ul>
+
+                  <div className="pt-2">
+                    <Button href="/learn/live" ariaLabel="Learn more about Live">
+                      Learn more about Live
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </BevelCard>
+          </FadeIn>
+        </section>
+
+
         {/* ✅ Final CTA (premium close) */}
         <section className="pt-10 sm:pt-12">
           <FadeIn delayMs={0}>
