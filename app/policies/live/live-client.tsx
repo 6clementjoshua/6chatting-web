@@ -453,7 +453,7 @@ export default function LivePolicyClient() {
                                 <Li>
                                     Contact page:{" "}
                                     <Link className="policy-link" href="/policies/contact" target="_blank" rel="noopener noreferrer">
-                                        /policies/contact
+                                        contact
                                     </Link>
                                 </Li>
                             </ul>
