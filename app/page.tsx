@@ -1705,7 +1705,8 @@ export default function Page() {
             </div>
           </FadeIn>
 
-          <div className="mt-0 stories-row">
+          <div className="mt-2 sm:mt-0 stories-row">
+
             {/* Media */}
             <FadeIn delayMs={40}>
               <div className="stories-media">
@@ -2176,10 +2177,29 @@ export default function Page() {
     rgba(0,0,0,0.04)
   );
 }
+/* ✅ Stories layout: mobile = image first (right under heading), desktop = 2 columns */
 .stories-row {
   display: grid;
-  gap: 10px; /* tighter vertical rhythm */
+  gap: 10px;
   align-items: center;
+}
+
+/* Mobile only: force image to appear immediately after heading/subtitle */
+@media (max-width: 767px) {
+  .stories-row {
+    gap: 14px; /* comfortable but tight */
+  }
+  .stories-media {
+    order: 1;
+  }
+  .stories-text {
+    order: 2;
+  }
+
+  /* Optional: make the image feel closer + premium on mobile */
+  .stories-img-wrap {
+    height: 320px; /* slightly bigger on mobile */
+  }
 }
 
 @media (min-width: 768px) {
@@ -2188,6 +2208,7 @@ export default function Page() {
     gap: 22px;
   }
 }
+
 
 .stories-glass {
   border-radius: 24px;
