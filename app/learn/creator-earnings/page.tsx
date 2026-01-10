@@ -48,6 +48,7 @@ const Button = ({
 };
 
 export default function CreatorEarningsPage() {
+    const year = new Date().getFullYear();
     return (
         <main className="mx-auto w-[min(1120px,calc(100%-24px))] pb-14" style={{ paddingTop: "calc(var(--header-h, 64px) + 18px)" }}>
             {/* Hero */}
@@ -303,7 +304,47 @@ export default function CreatorEarningsPage() {
                 </BevelCard>
             </section>
 
-           
+            <div className="mt-8 text-[13px] leading-[1.7] text-neutral-600">
+                Creator earnings on 6chatting are subject to eligibility, review, and compliance requirements.
+                Participation is governed by the
+                <Link href="/policies/creator-monetization" className="font-semibold underline mx-1">
+                    Creator Monetization Policy
+                </Link>,
+                along with our
+                <Link href="/policies/acceptable-use" className="font-semibold underline mx-1">
+                    Acceptable Use Policy
+                </Link>.
+            </div>
+
+
+                <footer className="pt-10 text-neutral-700">
+                    <div className="border-t border-black/10 pt-6">
+                        <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[12px] font-semibold">
+                            <Link href="/policies/terms" target="_blank" rel="noopener noreferrer">
+                                Terms of Service
+                            </Link>
+                            <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer">
+                                Privacy Policy
+                            </Link>
+                            <Link href="/policies/safety" target="_blank" rel="noopener noreferrer">
+                                Safety
+                            </Link>
+                            <Link href="/policies/acceptable-use" target="_blank" rel="noopener noreferrer">
+                                Acceptable Use
+                            </Link>
+                            <Link href="/policies/ai-translation" target="_blank" rel="noopener noreferrer">
+                                AI & Translation
+                            </Link>
+                            <Link href="/policies/contact" target="_blank" rel="noopener noreferrer">
+                                Contact
+                            </Link>
+                        </div>
+
+                        <div className="mt-5 text-center text-xs font-normal text-neutral-600">
+                            © {year} 6chatting. <span className="mx-1">A 6clement Joshua Service.</span> All rights reserved.
+                        </div>
+                    </div>
+                </footer>
         </main>
     );
 }

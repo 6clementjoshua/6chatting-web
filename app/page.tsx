@@ -1905,6 +1905,14 @@ export default function Page() {
                 Acceptable Use
               </Link>
 
+              <Link href="/policies/live" target="_blank" rel="noopener noreferrer">
+                Live Streaming Policy
+              </Link>
+
+              <Link href="/policies/creator-monetization" target="_blank" rel="noopener noreferrer">
+                Creator Monetization
+              </Link>
+
               <Link href="/policies/subscription-billing" target="_blank" rel="noopener noreferrer">
                 Subscription & Billing
               </Link>

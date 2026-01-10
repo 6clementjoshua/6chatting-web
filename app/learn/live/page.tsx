@@ -701,6 +701,7 @@ export default function LiveLearnPage() {
                     </div>
                 </section>
 
+
                 {/* CTA */}
                 <section className="pt-10 sm:pt-12">
                     <BevelCard className="p-5 sm:p-7">
@@ -732,6 +733,16 @@ export default function LiveLearnPage() {
                         </div>
                     </BevelCard>
                 </section>
+
+                <div className="mt-8 text-[13px] leading-[1.7] text-neutral-600">
+                    Live sessions on 6chatting are governed by our platform policies to protect users, creators, and businesses.
+                    By hosting or participating in Live, you agree to comply with the
+                    <Link href="/policies/live" className="font-semibold underline mx-1">Live Streaming Policy</Link>,
+                    <Link href="/policies/safety" className="font-semibold underline mx-1">Safety Policy</Link>,
+                    and
+                    <Link href="/policies/acceptable-use" className="font-semibold underline mx-1">Acceptable Use Policy</Link>.
+                </div>
+
 
                 <footer className="pt-10 text-neutral-700">
                     <div className="border-t border-black/10 pt-6">
