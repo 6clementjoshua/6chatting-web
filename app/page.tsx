@@ -1177,7 +1177,8 @@ export default function Page() {
         {/* ✅ Stories (premium + cardless) */}
         {/* ✅ Stories (premium + aligned to heading) */}
         <section id="stories" className="pt-10 sm:pt-12 scroll-mt-24">
-          <div className="grid gap-6 md:grid-cols-[1.05fr_.95fr] md:items-start">
+          <div className="grid gap-4 md:gap-6 md:grid-cols-[1.05fr_.95fr] md:items-start">
+
             {/* LEFT — Heading + Copy */}
             <div>
               <FadeIn delayMs={0}>
@@ -1192,6 +1193,22 @@ export default function Page() {
                   <p className="max-w-3xl text-[14px] sm:text-[14.5px] leading-[1.75] text-neutral-700">
                     {STORIES_FEATURE.subtitle}
                   </p>
+                  {/* ✅ Mobile-only image: sits directly under the subtitle */}
+                  <FadeIn delayMs={30}>
+                    <div className="stories-media md:hidden mt-3">
+                      <div className="stories-glass">
+                        <div className="stories-img-wrap stories-img-wrap--top">
+                          <Image
+                            src={STORIES_FEATURE.imageSrc}
+                            alt={STORIES_FEATURE.imageAlt}
+                            fill
+                            className="stories-img object-contain"
+                            sizes="(max-width: 768px) 92vw, 520px"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </FadeIn>
                 </div>
               </FadeIn>
 
@@ -1284,8 +1301,9 @@ export default function Page() {
             </div>
 
             {/* RIGHT — Image aligned with subtitle */}
+            {/* ✅ Desktop-only image: stays on the right */}
             <FadeIn delayMs={40}>
-              <div className="stories-media md:mt-[2px]">
+              <div className="stories-media hidden md:block md:mt-[2px]">
                 <div className="stories-glass">
                   <div className="stories-img-wrap stories-img-wrap--top">
                     <Image
