@@ -303,34 +303,7 @@ export default function CreatorEarningsPage() {
                 </BevelCard>
             </section>
 
-            <style jsx global>{`
-        /* If your global water-bevel / water-btn already exists, this keeps consistency.
-           If not, these lightweight fallbacks prevent “unstyled” pages. */
-        .water-bevel {
-          border-radius: 26px;
-          border: 1px solid rgba(0, 0, 0, 0.10);
-          background: rgba(255, 255, 255, 0.72);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          box-shadow: 14px 14px 28px rgba(0, 0, 0, 0.10), -14px -14px 28px rgba(255, 255, 255, 0.85);
-        }
-        .water-btn {
-          border-radius: 999px;
-          border: 1px solid rgba(0, 0, 0, 0.12);
-          background: rgba(255, 255, 255, 0.92);
-          box-shadow: 10px 10px 22px rgba(0, 0, 0, 0.10), -10px -10px 22px rgba(255, 255, 255, 0.85);
-          transition: transform 180ms ease, filter 180ms ease;
-        }
-        .water-btn:hover {
-          transform: translateY(-1px);
-          filter: contrast(1.02);
-        }
-        .water-btn-primary {
-          background: rgba(0, 0, 0, 0.86);
-          color: white;
-          border: 1px solid rgba(0, 0, 0, 0.25);
-        }
-      `}</style>
+           
         </main>
     );
 }
