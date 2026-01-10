@@ -125,7 +125,16 @@ const Li = ({ children }: { children: React.ReactNode }) => (
     </li>
 );
 
+function useHydrated() {
+    const [hydrated, setHydrated] = useState(false);
+    useEffect(() => setHydrated(true), []);
+    return hydrated;
+}
+
+
 export default function LivePolicyPage() {
+    const hydrated = useHydrated();
+
     const ids = useMemo(() => TOC.map((t) => t.id), []);
     const active = useActiveAnchor(ids);
     const [showTop, setShowTop] = useState(false);
@@ -138,7 +147,7 @@ export default function LivePolicyPage() {
     }, []);
 
     return (
-        <div className="policy-page">
+        <div className="policy-page" data-hydrated={hydrated ? "1" : "0"}>
             <main className="policy-shell">
                 {/* Hero */}
                 <div className="policy-hero reveal">
@@ -533,18 +542,37 @@ export default function LivePolicyPage() {
           padding-top: calc(var(--header-h, 64px) + 14px);
           padding-bottom: 60px;
         }
+/* ✅ No-flick reveal:
+   - Content is visible immediately (no white flash / zoom).
+   - Animation only runs after hydration (client paint). */
+.reveal {
+  opacity: 1;
+  transform: none;
+}
 
-        .reveal {
-          opacity: 0;
-          transform: translateY(10px);
-          animation: revealIn 520ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
-        @keyframes revealIn {
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
+/* Run the entrance animation only after hydration */
+.policy-page[data-hydrated="1"] .reveal {
+  animation: revealIn 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes revealIn {
+  from {
+    opacity: 0.96;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .policy-page[data-hydrated="1"] .reveal {
+    animation: none !important;
+  }
+}
+
 
         .policy-hero {
           border: 1px solid rgba(0, 0, 0, 0.1);
